@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="League.Application/League.Application.csproj" />
+    <Project Path="League.Infrastructure/League.Infrastructure.csproj" />
+    <Project Path="League.Presentation/League.Presentation.csproj" Id="4eb555b2-7302-4555-8577-0bf93ccef628" />
+    <Project Path="League.WebApi/League.WebApi.csproj" Id="3a1d6cc5-8782-4e20-a503-f87c1c1b66f5" />
+    <Project Path="League/League.Domain.csproj" />
+  </Folder>
+</Solution>
