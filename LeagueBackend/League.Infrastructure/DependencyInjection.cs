@@ -1,11 +1,20 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using League.Application.Common.Interfaces;
+using League.Infrastructure.Identity; // Asegúrate de que esta carpeta y clase existan
+using Microsoft.Extensions.DependencyInjection;
 
-namespace League.Infrastructure;
-
-public static class DependencyInjection
+namespace League.Infrastructure
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+    public static class DependencyInjection
     {
-        return services;
+        public static IServiceCollection AddInfrastructure(this IServiceCollection services)
+        {
+            // Seguridad
+            services.AddScoped<IPasswordHasher, PasswordHasher>();
+            services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+            // Identidad
+            services.AddScoped<IUserService, UserService>();
+
+            return services;
+        }
     }
 }

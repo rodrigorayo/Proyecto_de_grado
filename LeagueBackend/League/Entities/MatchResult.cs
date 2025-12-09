@@ -1,17 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
 namespace League.Domain.Entities
 {
     public class MatchResult
     {
+        [Key]
+        public int Id { get; set; } // Nuevo
+
+        // Cambiamos List a virtual ICollection para mejor soporte de EF (opcional pero recomendado)
         private readonly List<Goal> _goals = new();
         private readonly List<Incident> _incidents = new();
 
-        public IReadOnlyCollection<Goal> Goals => _goals.AsReadOnly();
-        public IReadOnlyCollection<Incident> Incidents => _incidents.AsReadOnly();
-        public string Observations { get; private set; }
+        // EF Core necesita acceso a las colecciones. 
+        // Exponemos la lista para navegación
+        public virtual ICollection<Goal> Goals => _goals;
+        public virtual ICollection<Incident> Incidents => _incidents;
+
+        public string? Observations { get; private set; }
+
+        // Constructor vacío para EF
+        public MatchResult() { }
 
         public void AddGoal(Goal goal)
         {
@@ -26,7 +37,6 @@ namespace League.Domain.Entities
         }
 
         public int GoalsForTeam(Guid teamId) => _goals.Count(g => g.TeamId == teamId);
-
         public void SetObservations(string obs) => Observations = obs;
     }
 }

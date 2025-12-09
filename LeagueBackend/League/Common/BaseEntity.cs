@@ -3,12 +3,11 @@ using System.Collections.Generic;
 
 namespace League.Domain.Common
 {
-    /// <summary>
-    /// Base entity con Id, timestamps y soporte simple para domain events.
-    /// </summary>
     public abstract class BaseEntity
     {
-        public Guid Id { get; protected set; } = Guid.NewGuid();
+        // CAMBIO IMPORTANTE: Quitamos 'protected' para que el DbContext pueda asignar IDs fijos
+        public Guid Id { get; set; } = Guid.NewGuid();
+
         public DateTime CreatedAt { get; protected set; } = DateTime.UtcNow;
         public DateTime? UpdatedAt { get; protected set; }
 
