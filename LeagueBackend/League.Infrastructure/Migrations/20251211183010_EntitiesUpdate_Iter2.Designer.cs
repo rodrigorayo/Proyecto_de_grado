@@ -4,6 +4,7 @@ using League.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace League.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251211183010_EntitiesUpdate_Iter2")]
+    partial class EntitiesUpdate_Iter2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -195,18 +198,12 @@ namespace League.Infrastructure.Migrations
                     b.Property<DateTime?>("BirthDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CI")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Goals")
                         .HasColumnType("int");
@@ -220,7 +217,7 @@ namespace League.Infrastructure.Migrations
                     b.Property<int>("RedCards")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("TeamId")
+                    b.Property<Guid?>("TeamId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -265,28 +262,28 @@ namespace League.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2025, 12, 11, 22, 1, 55, 405, DateTimeKind.Utc).AddTicks(8348),
+                            CreatedAt = new DateTime(2025, 12, 11, 18, 30, 9, 930, DateTimeKind.Utc).AddTicks(4956),
                             Description = "Full Access",
                             Name = "Admin"
                         },
                         new
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            CreatedAt = new DateTime(2025, 12, 11, 22, 1, 55, 405, DateTimeKind.Utc).AddTicks(8368),
+                            CreatedAt = new DateTime(2025, 12, 11, 18, 30, 9, 930, DateTimeKind.Utc).AddTicks(4979),
                             Description = "Team Management",
                             Name = "Delegate"
                         },
                         new
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
-                            CreatedAt = new DateTime(2025, 12, 11, 22, 1, 55, 405, DateTimeKind.Utc).AddTicks(8371),
+                            CreatedAt = new DateTime(2025, 12, 11, 18, 30, 9, 930, DateTimeKind.Utc).AddTicks(4983),
                             Description = "Match Reporting",
                             Name = "Referee"
                         },
                         new
                         {
                             Id = new Guid("44444444-4444-4444-4444-444444444444"),
-                            CreatedAt = new DateTime(2025, 12, 11, 22, 1, 55, 405, DateTimeKind.Utc).AddTicks(8373),
+                            CreatedAt = new DateTime(2025, 12, 11, 18, 30, 9, 930, DateTimeKind.Utc).AddTicks(4988),
                             Description = "Read Only",
                             Name = "Fan"
                         });
@@ -300,8 +297,7 @@ namespace League.Infrastructure.Migrations
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -310,23 +306,17 @@ namespace League.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("LogoUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<Guid?>("TournamentId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("TournamentId");
 
                     b.ToTable("Teams");
                 });
@@ -345,8 +335,7 @@ namespace League.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
@@ -429,22 +418,9 @@ namespace League.Infrastructure.Migrations
 
             modelBuilder.Entity("League.Domain.Entities.Player", b =>
                 {
-                    b.HasOne("League.Domain.Entities.Team", "Team")
+                    b.HasOne("League.Domain.Entities.Team", null)
                         .WithMany("Players")
-                        .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Team");
-                });
-
-            modelBuilder.Entity("League.Domain.Entities.Team", b =>
-                {
-                    b.HasOne("League.Domain.Entities.Tournament", "Tournament")
-                        .WithMany("Teams")
-                        .HasForeignKey("TournamentId");
-
-                    b.Navigation("Tournament");
+                        .HasForeignKey("TeamId");
                 });
 
             modelBuilder.Entity("League.Domain.Entities.User", b =>
@@ -473,11 +449,6 @@ namespace League.Infrastructure.Migrations
             modelBuilder.Entity("League.Domain.Entities.Team", b =>
                 {
                     b.Navigation("Players");
-                });
-
-            modelBuilder.Entity("League.Domain.Entities.Tournament", b =>
-                {
-                    b.Navigation("Teams");
                 });
 #pragma warning restore 612, 618
         }

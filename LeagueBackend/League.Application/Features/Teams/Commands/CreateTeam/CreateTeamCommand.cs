@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MediatR;
+using System;
 
 namespace League.Application.Features.Teams.Commands.CreateTeam
 {
-    internal class CreateTeamCommand
-    {
-    }
+    // Solo datos, nada de lógica
+    public record CreateTeamCommand(string Name, string Category, string? LogoUrl) : IRequest<Guid>;
 }

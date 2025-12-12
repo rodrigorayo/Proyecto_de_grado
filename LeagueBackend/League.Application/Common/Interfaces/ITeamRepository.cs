@@ -1,13 +1,15 @@
-﻿using System;
+﻿using League.Domain.Entities;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using League.Domain.Entities;
 
 namespace League.Application.Common.Interfaces
 {
     public interface ITeamRepository
     {
-        Task<Team> GetByIdAsync(Guid id);
+        // El ? indica que puede retornar null si no existe el ID
+        Task<Team?> GetByIdAsync(Guid id);
+
         Task<List<Team>> GetAllAsync();
         Task AddAsync(Team team);
         Task UpdateAsync(Team team);

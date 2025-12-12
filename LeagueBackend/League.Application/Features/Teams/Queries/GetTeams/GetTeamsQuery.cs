@@ -1,12 +1,10 @@
-﻿using System;
+﻿using League.Domain.Entities;
+using MediatR;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace League.Application.Features.Teams.Queries.GetTeams
 {
-    internal class GetTeamsQuery
-    {
-    }
+    // Esto es una solicitud: "Quiero una Lista de Equipos"
+    // Al ser un 'record', se ve "vacío", pero es una clase completa en una sola línea.
+    public record GetTeamsQuery : IRequest<List<Team>>;
 }
