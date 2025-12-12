@@ -15,25 +15,26 @@ namespace League.Domain.Entities
         [MaxLength(50)]
         public string Category { get; private set; }
 
-        public Guid? DelegateId { get; private set; } // Referencia al usuario (delegado)
+        public Guid? DelegateId { get; private set; }
 
         [MaxLength(500)]
         public string? LogoUrl { get; private set; }
 
-        // --- RELACIÓN 1:N (Un equipo pertenece a UN torneo) ---
-        // Puede ser nulo (Guid?) porque al crear el equipo quizás aún no se inscribe
+        // --- NUEVO: Soft Delete (Estado Activo/Inactivo) ---
+        public bool IsActive { get; private set; } = true;
+        // ---------------------------------------------------
+
+        // Relaciones
         public Guid? TournamentId { get; private set; }
         public virtual Tournament? Tournament { get; private set; }
-        // ------------------------------------------------------
 
-        // --- RELACIÓN 1:N (Un equipo tiene MUCHOS jugadores) ---
         private readonly List<Player> _players = new();
         public virtual IReadOnlyCollection<Player> Players => _players.AsReadOnly();
 
-        // Constructor vacío REQUERIDO por EF Core
+        // Constructor vacío
         protected Team() { }
 
-        // Constructor para crear equipos nuevos
+        // Constructor principal
         public Team(string name, string category, Guid? delegateId = null, string logoUrl = null)
         {
             if (string.IsNullOrWhiteSpace(name)) throw new DomainException("El nombre del equipo es obligatorio.");
@@ -41,6 +42,7 @@ namespace League.Domain.Entities
             Category = category;
             DelegateId = delegateId;
             LogoUrl = logoUrl;
+            IsActive = true; // Nace activo por defecto
         }
 
         // --- MÉTODOS DE NEGOCIO ---
@@ -52,7 +54,7 @@ namespace League.Domain.Entities
             Category = category;
             DelegateId = delegateId;
             LogoUrl = logoUrl;
-            Touch(); // Actualiza fecha de modificación
+            Touch();
         }
 
         public void AssignToTournament(Guid tournamentId)
@@ -62,15 +64,20 @@ namespace League.Domain.Entities
             Touch();
         }
 
+        // --- NUEVO: Alternar Estado (En lugar de borrar) ---
+        public void ToggleStatus()
+        {
+            IsActive = !IsActive; // Si es true -> false, si es false -> true
+            Touch();
+        }
+        // ---------------------------------------------------
+
         public void AddPlayer(Player player)
         {
             if (player == null) throw new DomainException("Jugador inválido.");
-
-            // Validar si ya existe el número de camiseta
             if (_players.Any(p => p.Number == player.Number))
                 throw new DomainException($"Ya existe un jugador con el número {player.Number} en el equipo.");
 
-            // Asignar ID y agregar
             player.AssignToTeam(this.Id);
             _players.Add(player);
             Touch();

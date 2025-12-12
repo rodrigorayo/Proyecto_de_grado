@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace League.Application.Features.Teams.Commands.DeleteTeam
 {
-    // El sobre solo lleva el ID del equipo a eliminar
+    // Mantenemos el nombre "Delete" para no romper el Controller,
+    // pero internamente hace un "Soft Delete" (Desactivar).
     public record DeleteTeamCommand(Guid Id) : IRequest;
 
     public class DeleteTeamCommandHandler : IRequestHandler<DeleteTeamCommand>
@@ -20,7 +21,17 @@ namespace League.Application.Features.Teams.Commands.DeleteTeam
 
         public async Task Handle(DeleteTeamCommand request, CancellationToken cancellationToken)
         {
-            await _repository.DeleteAsync(request.Id);
+            // 1. Buscamos el equipo por ID
+            var team = await _repository.GetByIdAsync(request.Id);
+
+            // 2. Si existe, cambiamos su estado en lugar de borrarlo
+            if (team != null)
+            {
+                team.ToggleStatus(); // Llama al método de la entidad
+
+                // 3. Guardamos la actualización (Update en vez de Delete)
+                await _repository.UpdateAsync(team);
+            }
         }
     }
 }
