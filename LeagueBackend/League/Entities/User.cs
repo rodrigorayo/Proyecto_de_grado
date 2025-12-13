@@ -1,31 +1,24 @@
-﻿using League.Domain.Common;
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.Collections.Generic;
 
 namespace League.Domain.Entities
 {
-    public class User : BaseEntity
+    public class User
     {
-        [Required]
-        [MaxLength(100)]
-        public string FullName { get; set; } = string.Empty;
+        public Guid Id { get; set; }
 
-        [Required]
-        [EmailAddress]
-        [MaxLength(100)]
+        // Corrección 1: Aseguramos que sea UserName (PascalCase)
+        public string UserName { get; set; } = string.Empty;
+
         public string Email { get; set; } = string.Empty;
 
-        // Security
-        public byte[] PasswordHash { get; set; } = Array.Empty<byte>();
-        public byte[] PasswordSalt { get; set; } = Array.Empty<byte>();
+        public string FullName { get; set; } = string.Empty;
 
-        public bool IsActive { get; set; } = true;
+        // Corrección 2: Cambiamos byte[] por string para usar BCrypt
+        public string PasswordHash { get; set; } = string.Empty;
 
-        // Foreign Key
+        // Relación con Roles
         public Guid RoleId { get; set; }
-
-        [ForeignKey("RoleId")]
         public Role? Role { get; set; }
     }
 }

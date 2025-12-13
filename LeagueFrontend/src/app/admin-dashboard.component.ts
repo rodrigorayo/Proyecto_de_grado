@@ -12,7 +12,7 @@ import { MatchEventService } from './services/match-event.service';
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, NgOptimizedImage, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   template: `
     <div class="flex min-h-screen bg-gray-50 font-sans text-gray-800">
       

@@ -1,9 +1,9 @@
 ﻿using League.Application.Features.Matches.Commands.CreateMatch;
 using League.Application.Features.Matches.Queries.GetMatchesByTournament;
+using League.Application.Features.Matches.Commands.UpdateMatchResult; // 👈 Asegúrate de importar esto
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using League.Application.Features.Matches.Commands.RegisterMatchResult;
 
 namespace League.WebApi.Controllers
 {
@@ -26,9 +26,9 @@ namespace League.WebApi.Controllers
             return Ok(matches);
         }
 
-        // POST: api/Matches
+        // POST: api/Matches (Crear Partido)
         [HttpPost]
-        [Authorize]
+        [Authorize] // Roles = "Admin" idealmente
         public async Task<IActionResult> Create([FromBody] CreateMatchCommand command)
         {
             try
@@ -38,7 +38,6 @@ namespace League.WebApi.Controllers
             }
             catch (Exception ex)
             {
-                // AQUÍ ESTÁ EL CAMBIO PARA VER EL ERROR REAL
                 return BadRequest(new
                 {
                     Error = ex.Message,
@@ -47,16 +46,20 @@ namespace League.WebApi.Controllers
             }
         }
 
-        // PUT: api/Matches/{id}/Result
+        // PUT: api/Matches/{id}/Result (Cargar Resultado)
+        // Este es el método que usará el COMITÉ
         [HttpPut("{id}/Result")]
-        [Authorize]
-        public async Task<IActionResult> RegisterResult(Guid id, [FromBody] RegisterMatchResultCommand command)
+        [Authorize] // Roles = "Committee, Admin"
+        public async Task<IActionResult> RegisterResult(Guid id, [FromBody] UpdateMatchResultCommand command)
         {
-            if (id != command.MatchId) return BadRequest("ID mismatch");
+            if (id != command.MatchId) return BadRequest("El ID de la URL no coincide con el cuerpo.");
 
             try
             {
-                await _mediator.Send(command);
+                var success = await _mediator.Send(command);
+
+                if (!success) return NotFound("Partido no encontrado o ya finalizado.");
+
                 return Ok(new { Message = "Resultado registrado correctamente" });
             }
             catch (Exception ex)

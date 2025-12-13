@@ -1,4 +1,5 @@
 using League.Application;
+using League.Application.Common.Interfaces;
 using League.Infrastructure;
 using League.Infrastructure.Persistence;
 using League.Presentation;
@@ -26,6 +27,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString,
         b => b.MigrationsAssembly("League.Infrastructure")));
+builder.Services.AddScoped<IApplicationDbContext>(provider =>
+    provider.GetRequiredService<ApplicationDbContext>());
 
 // 4. Configurar CORS
 builder.Services.AddCors(options =>

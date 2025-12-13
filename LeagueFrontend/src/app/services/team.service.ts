@@ -6,30 +6,32 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class TeamService {
-  // Asegúrate de que este puerto sea el mismo de tu Swagger (7105)
-  private apiUrl = 'https://localhost:7105/api/Teams';
+  private apiUrl = 'https://localhost:7105/api/Teams'; 
   private http = inject(HttpClient);
 
-  // Método auxiliar para obtener el token y armar el Header
-  private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
+  private getHeaders() {
+    return new HttpHeaders({ 'Authorization': `Bearer ${localStorage.getItem('token')}` });
   }
 
+  // 👇 AQUÍ ESTABA EL ERROR: Renombrado de getAll() a getTeams()
   getTeams(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl);
+    return this.http.get<any[]>(this.apiUrl, { headers: this.getHeaders() });
   }
 
-  createTeam(team: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl, team, { headers: this.getHeaders() });
+  getById(id: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
   }
+
+  // Métodos que usa tu Admin Dashboard (NO TOCAR)
+  createTeam(team: any): Observable<any> {
+    return this.http.post(this.apiUrl, team, { headers: this.getHeaders() });
+  }
+
   updateTeam(id: string, team: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${id}`, team, { headers: this.getHeaders() });
+    return this.http.put(`${this.apiUrl}/${id}`, team, { headers: this.getHeaders() });
   }
 
   deleteTeam(id: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
+    return this.http.delete(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
   }
 }

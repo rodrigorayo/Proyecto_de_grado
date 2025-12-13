@@ -2,7 +2,7 @@ import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
-import { AuthService } from '../auth.service'; // <--- Importar servicio
+import { AuthService } from './services/auth.service'; 
 
 @Component({
   selector: 'app-login',
@@ -41,7 +41,7 @@ import { AuthService } from '../auth.service'; // <--- Importar servicio
 })
 export class LoginComponent {
   private router = inject(Router);
-  private authService = inject(AuthService); // <--- Inyectar servicio
+  private authService = inject(AuthService);
 
   username = signal('');
   password = signal('');
@@ -52,22 +52,37 @@ export class LoginComponent {
     this.isLoading.set(true);
 
     const credentials = {
-      userName: this.username(), // El backend espera "userName" (email)
+      userName: this.username(),
       password: this.password()
     };
 
-    // Llamada al Backend Real
     this.authService.login(credentials).subscribe({
       next: (res) => {
-        console.log('Login exitoso:', res);
+        // En este punto el 'tap' del servicio ya extrajo el rol del token
         this.isLoading.set(false);
-        this.router.navigate(['/admin']);
+
+        const role = this.authService.getRole();
+        console.log('Rol final para redirigir:', role); 
+
+        // Normalizamos el rol a string para evitar errores
+        const roleStr = String(role);
+
+        // Redirección segura
+        if (roleStr === 'Admin') {
+          this.router.navigate(['/admin']);
+        } else if (roleStr === 'Committee' || roleStr === 'CommitteeMember') {
+          this.router.navigate(['/committee']);
+        } else if (roleStr === 'Delegate') {
+          this.router.navigate(['/delegate']);
+        } else {
+          // Si no es ninguno, al inicio
+          this.router.navigate(['/']);
+        }
       },
       error: (err) => {
-        console.error('Error de login:', err);
+        console.error('Error login:', err);
         this.isLoading.set(false);
-        // OJO: Este mensaje es diferente al antiguo, así sabremos si funciona
-        alert('Error: Credenciales incorrectas o servidor apagado.');
+        alert('Credenciales incorrectas');
       }
     });
   }

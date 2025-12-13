@@ -1,4 +1,5 @@
-﻿using League.Application.Features.Standings.Queries.GetStandings;
+﻿using League.Application.DTOs;
+using League.Application.Features.Standings.Queries.GetStandings;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,11 +16,13 @@ namespace League.WebApi.Controllers
             _mediator = mediator;
         }
 
+        // GET: api/Standings/{tournamentId}
         [HttpGet("{tournamentId}")]
-        public async Task<IActionResult> Get(Guid tournamentId)
+        public async Task<ActionResult<List<TeamStandingDto>>> GetByTournament(Guid tournamentId)
         {
-            var table = await _mediator.Send(new GetStandingsQuery(tournamentId));
-            return Ok(table);
+            var query = new GetStandingsQuery(tournamentId);
+            var result = await _mediator.Send(query);
+            return Ok(result);
         }
     }
 }

@@ -4,6 +4,7 @@ using League.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace League.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251213090420_UpdateRoles_Committee")]
+    partial class UpdateRoles_Committee
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -229,23 +232,30 @@ namespace League.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2025, 12, 13, 9, 33, 7, 722, DateTimeKind.Utc).AddTicks(269),
+                            CreatedAt = new DateTime(2025, 12, 13, 9, 4, 19, 450, DateTimeKind.Utc).AddTicks(8637),
                             Description = "Full Access",
                             Name = "Admin"
                         },
                         new
                         {
                             Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            CreatedAt = new DateTime(2025, 12, 13, 9, 33, 7, 722, DateTimeKind.Utc).AddTicks(310),
+                            CreatedAt = new DateTime(2025, 12, 13, 9, 4, 19, 450, DateTimeKind.Utc).AddTicks(8662),
                             Description = "Team Management",
                             Name = "Delegate"
                         },
                         new
                         {
                             Id = new Guid("33333333-3333-3333-3333-333333333333"),
-                            CreatedAt = new DateTime(2025, 12, 13, 9, 33, 7, 722, DateTimeKind.Utc).AddTicks(355),
+                            CreatedAt = new DateTime(2025, 12, 13, 9, 4, 19, 450, DateTimeKind.Utc).AddTicks(8669),
                             Description = "Match Reporting",
-                            Name = "Committee"
+                            Name = "Referee"
+                        },
+                        new
+                        {
+                            Id = new Guid("44444444-4444-4444-4444-444444444444"),
+                            CreatedAt = new DateTime(2025, 12, 13, 9, 4, 19, 450, DateTimeKind.Utc).AddTicks(8675),
+                            Description = "Read Only",
+                            Name = "Fan"
                         });
                 });
 

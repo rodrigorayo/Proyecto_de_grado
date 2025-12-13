@@ -1,20 +1,18 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StandingService {
+  // Asegúrate que el puerto coincida con tu Swagger
   private apiUrl = 'https://localhost:7105/api/Standings';
   private http = inject(HttpClient);
 
-  private getHeaders() {
-    return new HttpHeaders({ 'Authorization': `Bearer ${localStorage.getItem('token')}` });
-  }
-
+  // ⚠️ CAMBIO: Quitamos los headers de autenticación porque es una vista PÚBLICA.
+  // Los fans no tienen token, así que si lo enviamos, fallará.
   getStandings(tournamentId: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/${tournamentId}`, { headers: this.getHeaders() });
+    return this.http.get<any[]>(`${this.apiUrl}/${tournamentId}`);
   }
-  
 }
