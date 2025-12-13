@@ -19,6 +19,7 @@ namespace League.Infrastructure
             services.AddScoped<IPlayerRepository, PlayerRepository>();
             services.AddScoped<ITournamentRepository, TournamentRepository>();
             services.AddScoped<IMatchRepository, MatchRepository>();
+            services.AddScoped<IMatchEventRepository, MatchEventRepository>();
 
             return services;
         }
