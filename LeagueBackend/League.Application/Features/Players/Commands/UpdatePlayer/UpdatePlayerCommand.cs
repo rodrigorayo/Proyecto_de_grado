@@ -10,10 +10,11 @@ namespace League.Application.Features.Players.Commands.UpdatePlayer
     public record UpdatePlayerCommand(
         Guid Id,
         string FullName,
-        string CI, // CI obligatorio al editar
+        string CI,
         int Number,
         string Position,
-        DateTime? BirthDate
+        DateTime? BirthDate,
+        string? PhotoUrl // 👈 Agregado
     ) : IRequest;
 
     public class UpdatePlayerCommandHandler : IRequestHandler<UpdatePlayerCommand>
@@ -30,11 +31,8 @@ namespace League.Application.Features.Players.Commands.UpdatePlayer
             var player = await _repository.GetByIdAsync(request.Id);
             if (player == null) throw new Exception("Jugador no encontrado.");
 
-            // VALIDAR UNICIDAD DEL CI AL EDITAR
-            // Buscamos si existe alguien con ese CI
+            // Validar Unicidad CI al editar
             var playerWithSameCi = await _repository.GetByCiAsync(request.CI);
-
-            // Si existe alguien con ese CI y NO es este mismo jugador (IDs diferentes), es un error
             if (playerWithSameCi != null && playerWithSameCi.Id != request.Id)
             {
                 throw new Exception($"El CI {request.CI} ya pertenece a otro jugador.");
@@ -45,7 +43,8 @@ namespace League.Application.Features.Players.Commands.UpdatePlayer
                 positionEnum = PlayerPosition.Midfielder;
             }
 
-            player.UpdateDetails(request.FullName, request.CI, request.Number, positionEnum, request.BirthDate);
+            // Actualizamos con la foto
+            player.UpdateDetails(request.FullName, request.CI, request.Number, positionEnum, request.BirthDate, request.PhotoUrl);
 
             await _repository.UpdateAsync(player);
         }

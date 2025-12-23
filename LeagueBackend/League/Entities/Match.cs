@@ -15,32 +15,39 @@ namespace League.Domain.Entities
 
         public MatchStatus Status { get; private set; }
 
-        // --- RESULTADOS (Simplificado para evitar ValueObjects complejos en EF por ahora) ---
-        public int? HomeScore { get; private set; }
-        public int? AwayScore { get; private set; }
+        // --- RESULTADOS ---
+        public int? HomeScore { get; private set; } // Lo mantengo nullable como lo tenías
+        public int? AwayScore { get; private set; } // Lo mantengo nullable como lo tenías
+
+        // 👇 PROPIEDAD AGREGADA PARA LA IA
+        [MaxLength(4000)]
+        public string? Chronicle { get; private set; }
+
+        // 👇 PROPIEDAD AGREGADA PARA EL ÁRBITRO
+        [MaxLength(1000)]
+        public string? Incidents { get; private set; }
 
         // --- RELACIONES OBLIGATORIAS ---
         [Required]
         public Guid TournamentId { get; private set; }
-        public virtual Tournament? Tournament { get; private set; } // Navegación
+        public virtual Tournament? Tournament { get; private set; }
 
         [Required]
-        public Guid HomeTeamId { get; private set; } // Antes TeamA
+        public Guid HomeTeamId { get; private set; }
         [ForeignKey("HomeTeamId")]
         public virtual Team? HomeTeam { get; private set; }
 
         [Required]
-        public Guid AwayTeamId { get; private set; } // Antes TeamB
+        public Guid AwayTeamId { get; private set; }
         [ForeignKey("AwayTeamId")]
         public virtual Team? AwayTeam { get; private set; }
 
-        // --- ÁRBITRO (Opcional) ---
+        // --- ÁRBITRO (Tu código original) ---
         public Guid? RefereeId { get; private set; }
-        // Si tuvieras una tabla de Users/Referees, aquí iría la navegación virtual
 
         protected Match() { }
 
-        // Constructor: PROGRAMAR PARTIDO
+        // Constructor Original (INTACTO)
         public Match(Guid tournamentId, Guid homeTeamId, Guid awayTeamId, DateTime matchDate, string? venue, Guid? refereeId = null)
         {
             if (tournamentId == Guid.Empty) throw new DomainException("El torneo es obligatorio.");
@@ -53,12 +60,12 @@ namespace League.Domain.Entities
             MatchDate = matchDate;
             Venue = venue;
             RefereeId = refereeId;
-            Status = MatchStatus.Scheduled; // Nace como programado
+            Status = MatchStatus.Scheduled;
         }
 
-        // --- MÉTODOS DE NEGOCIO (Cambios de Estado) ---
+        // --- MÉTODOS DE NEGOCIO ---
 
-        // 1. Iniciar el partido (El árbitro pita el inicio)
+        // 1. Iniciar Partido (Tu código original)
         public void StartMatch()
         {
             if (Status != MatchStatus.Scheduled)
@@ -68,10 +75,11 @@ namespace League.Domain.Entities
             Touch();
         }
 
-        // 2. Finalizar y Registrar Resultado
+        // 2. Finalizar (Tu código original + Ajuste de Enum)
         public void FinishMatch(int homeScore, int awayScore)
         {
-            if (Status == MatchStatus.Finalized)
+            // Nota: Cambié 'Finalized' por 'Finished' para coincidir con el Enum nuevo.
+            if (Status == MatchStatus.Finished)
                 throw new DomainException("El partido ya fue finalizado anteriormente.");
 
             if (homeScore < 0 || awayScore < 0)
@@ -79,33 +87,50 @@ namespace League.Domain.Entities
 
             HomeScore = homeScore;
             AwayScore = awayScore;
-            Status = MatchStatus.Finalized;
+            Status = MatchStatus.Finished;
             Touch();
         }
 
-        // 3. Cancelar/Suspender
+        // 👇 2.5 NUEVO MÉTODO: Finalizar CON Incidencias (Necesario para el reporte completo)
+        public void UpdateResultDetails(int homeScore, int awayScore, string? incidents)
+        {
+            HomeScore = homeScore;
+            AwayScore = awayScore;
+            Incidents = incidents; // Guardamos lo que escribió el árbitro
+            Status = MatchStatus.Finished;
+            Touch();
+        }
+
+        // 3. Cancelar (Tu código original)
         public void CancelMatch()
         {
             Status = MatchStatus.Canceled;
             Touch();
         }
 
-        // 4. Reprogramar (Cambiar fecha/lugar)
+        // 4. Reprogramar (Tu código original)
         public void Reschedule(DateTime newDate, string newVenue)
         {
-            if (Status == MatchStatus.Finalized)
+            if (Status == MatchStatus.Finished)
                 throw new DomainException("No se puede reprogramar un partido ya jugado.");
 
             MatchDate = newDate;
             Venue = newVenue;
-            Status = MatchStatus.Scheduled; // Vuelve a estar programado si estaba cancelado
+            Status = MatchStatus.Scheduled;
             Touch();
         }
 
-        // 5. Asignar Árbitro
+        // 5. Asignar Árbitro (Tu código original)
         public void AssignReferee(Guid refereeId)
         {
             RefereeId = refereeId;
+            Touch();
+        }
+
+        // 6. Actualizar Crónica IA (Tu código original)
+        public void UpdateChronicle(string text)
+        {
+            Chronicle = text;
             Touch();
         }
     }

@@ -29,7 +29,14 @@ import { MatchEventService } from '../services/match-event.service';
             @if (selectedTournamentId()) {
                 <div class="space-y-4">
                     @for (match of matches(); track match.id) {
-                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow relative overflow-hidden">
+                            
+                            @if (match.chronicle) {
+                                <div class="absolute top-0 right-0 bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-1 rounded-bl-lg">
+                                    ✨ IA News
+                                </div>
+                            }
+
                             <div class="flex flex-col md:flex-row items-center justify-between gap-6">
                                 <div class="text-center md:text-left min-w-[100px]">
                                     <span class="block text-sm font-bold text-gray-400 uppercase tracking-wider">{{ match.matchDate | date:'MMM d' }}</span>
@@ -52,11 +59,18 @@ import { MatchEventService } from '../services/match-event.service';
                                     <span class="text-lg md:text-xl font-bold text-gray-900 text-left flex-1">{{ match.awayTeam?.name }}</span>
                                 </div>
 
-                                <div class="min-w-[100px] text-center md:text-right">
+                                <div class="min-w-[100px] text-center md:text-right flex flex-col items-center md:items-end gap-2">
                                     <span class="px-3 py-1 rounded-full text-xs font-bold uppercase" 
-                                          [ngClass]="match.status === 2 ? 'bg-green-100 text-green-800' : (match.status === 0 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600')">
+                                        [ngClass]="match.status === 2 ? 'bg-green-100 text-green-800' : (match.status === 0 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600')">
                                         {{ match.status === 2 ? 'Finalizado' : 'Programado' }}
                                     </span>
+                                    
+                                    @if (match.chronicle) {
+                                        <button (click)="openChronicle(match)" class="text-xs flex items-center gap-1 text-purple-600 font-bold hover:text-purple-800 hover:underline transition-all">
+                                            <span>📰</span> Leer Crónica
+                                        </button>
+                                    }
+                                    
                                     <p class="text-xs text-gray-400 mt-1">{{ match.venue }}</p>
                                 </div>
                             </div>
@@ -95,6 +109,40 @@ import { MatchEventService } from '../services/match-event.service';
 
       </div>
     </div>
+
+    @if (selectedMatchForChronicle()) {
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in" (click)="closeChronicle()">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden transform transition-all scale-100" (click)="$event.stopPropagation()">
+                <div class="bg-gradient-to-r from-purple-600 to-indigo-600 p-6 text-white relative">
+                    <button (click)="closeChronicle()" class="absolute top-4 right-4 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-1 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                    <div class="flex items-center gap-2 mb-2 opacity-90">
+                        <span class="text-xs font-bold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded">Resumen IA</span>
+                        <span class="text-xs font-medium">{{ selectedMatchForChronicle().matchDate | date:'mediumDate' }}</span>
+                    </div>
+                    <h3 class="text-2xl font-black leading-tight">
+                        {{ selectedMatchForChronicle().homeTeam?.name }} <span class="opacity-50">vs</span> {{ selectedMatchForChronicle().awayTeam?.name }}
+                    </h3>
+                </div>
+
+                <div class="p-8 max-h-[70vh] overflow-y-auto">
+                    <div class="prose prose-purple max-w-none text-gray-700 leading-relaxed whitespace-pre-line font-medium text-lg">
+                        {{ selectedMatchForChronicle().chronicle }}
+                    </div>
+                    
+                    <div class="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between text-sm text-gray-400">
+                        <span>Generado por Gemini AI 🤖</span>
+                        <span>Liga Gremial Yacuiba</span>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 p-4 text-center border-t border-gray-100">
+                    <button (click)="closeChronicle()" class="text-gray-600 font-bold hover:text-gray-900 hover:bg-gray-200 px-6 py-2 rounded-lg transition-colors">Cerrar Noticia</button>
+                </div>
+            </div>
+        </div>
+    }
   `
 })
 export class PublicMatchesComponent implements OnInit {
@@ -106,6 +154,9 @@ export class PublicMatchesComponent implements OnInit {
   selectedTournamentId = signal<string | null>(null);
   matches = signal<any[]>([]);
   topScorers = signal<any[]>([]);
+
+  // Señal para controlar qué crónica se está leyendo
+  selectedMatchForChronicle = signal<any>(null);
 
   ngOnInit() {
     this.tournamentService.getAll().subscribe(data => this.tournaments.set(data));
@@ -119,5 +170,14 @@ export class PublicMatchesComponent implements OnInit {
 
   loadTopScorers() {
     this.matchEventService.getTopScorers().subscribe(data => this.topScorers.set(data));
+  }
+
+  // Métodos para el Modal
+  openChronicle(match: any) {
+    this.selectedMatchForChronicle.set(match);
+  }
+
+  closeChronicle() {
+    this.selectedMatchForChronicle.set(null);
   }
 }

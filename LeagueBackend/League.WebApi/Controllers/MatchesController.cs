@@ -1,6 +1,7 @@
 ﻿using League.Application.Features.Matches.Commands.CreateMatch;
-using League.Application.Features.Matches.Queries.GetMatchesByTournament;
+using League.Application.Features.Matches.Commands.GenerateChronicle;
 using League.Application.Features.Matches.Commands.UpdateMatchResult; // 👈 Asegúrate de importar esto
+using League.Application.Features.Matches.Queries.GetMatchesByTournament;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -61,6 +62,21 @@ namespace League.WebApi.Controllers
                 if (!success) return NotFound("Partido no encontrado o ya finalizado.");
 
                 return Ok(new { Message = "Resultado registrado correctamente" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+        }
+
+        [HttpPost("{id}/generate-chronicle")]
+        // [Authorize(Roles = "Admin,Committee")] // Descomenta esto después para seguridad
+        public async Task<IActionResult> GenerateChronicle(Guid id)
+        {
+            try
+            {
+                var result = await _mediator.Send(new GenerateMatchChronicleCommand(id));
+                return Ok(new { Chronicle = result });
             }
             catch (Exception ex)
             {

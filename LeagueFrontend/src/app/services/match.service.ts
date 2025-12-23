@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+// ✅ MANTENEMOS TU INTERFAZ ORIGINAL
 export interface Match {
   id: string;
   homeTeamId: string;
@@ -13,6 +14,8 @@ export interface Match {
   status: number;
   homeScore?: number;
   awayScore?: number;
+  chronicle?: string; // 👈 Agregué esto opcional por si quieres usar el tipado estricto luego
+  incidents?: string; // 👈 Agregué esto opcional
 }
 
 @Injectable({
@@ -20,33 +23,31 @@ export interface Match {
 })
 export class MatchService {
   private http = inject(HttpClient);
-  // CONFIRMA QUE ESTE PUERTO SEA EL MISMO DE TU SWAGGER (7105 usualmente)
   private apiUrl = 'https://localhost:7105/api/Matches'; 
 
-  // --- MÉTODOS DE LECTURA ---
+  // Helper para el token
+  private getHeaders() {
+    return new HttpHeaders({ 'Authorization': `Bearer ${localStorage.getItem('token')}` });
+  }
 
-  // 1. Obtener partidos de un torneo
+  // --- LECTURA (Mantenemos tu lógica: Público, sin headers obligatorios) ---
   getMatchesByTournament(tournamentId: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/ByTournament/${tournamentId}`);
   }
 
-  // --- MÉTODOS DEL ADMIN ---
-
-  // 2. Crear Partido (Esto es lo que faltaba y causaba el error TS2339)
+  // --- ADMIN (Requiere Token) ---
   createMatch(matchData: any): Observable<any> {
-    return this.http.post(this.apiUrl, matchData);
+    return this.http.post(this.apiUrl, matchData, { headers: this.getHeaders() });
   }
 
-  // --- MÉTODOS DEL COMITÉ ---
-
-  // 3. Cargar Resultado (Versión completa para el Comité)
-  updateMatchResult(matchId: string, resultData: { matchId: string, homeScore: number, awayScore: number, incidents: string }): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${matchId}/Result`, resultData);
+  // --- COMITÉ (Requiere Token) ---
+  updateMatchResult(matchId: string, resultData: any): Observable<any> {
+    // resultData espera: { matchId, homeScore, awayScore, incidents }
+    // Nota: Tu backend espera la ruta "/Result" (Case sensitive a veces importa, lo dejé como lo tenías)
+    return this.http.put(`${this.apiUrl}/${matchId}/Result`, resultData, { headers: this.getHeaders() });
   }
 
-  // 4. Adaptador para el Admin (Para arreglar el otro error TS2339)
-  // El Admin llama a 'registerResult(id, home, away)', así que creamos este método
-  // para que traduzca la petición al formato nuevo.
+  // Adaptador para compatibilidad (Lo mantenemos tal cual)
   registerResult(matchId: string, homeScore: number, awayScore: number): Observable<any> {
     const command = {
       matchId: matchId,
@@ -55,5 +56,11 @@ export class MatchService {
       incidents: 'Carga rápida Admin'
     };
     return this.updateMatchResult(matchId, command);
+  }
+
+  // 👇👇 NUEVO MÉTODO AGREGADO PARA LA IA 👇👇
+  generateChronicle(matchId: string): Observable<any> {
+    // El segundo parámetro {} es el body vacío, necesario para un POST
+    return this.http.post(`${this.apiUrl}/${matchId}/generate-chronicle`, {}, { headers: this.getHeaders() });
   }
 }

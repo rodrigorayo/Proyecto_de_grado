@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TeamService } from '../../../services/team.service';
+import { TeamService } from '../../services/team.service';
 import { RouterLink } from '@angular/router';
 
 @Component({

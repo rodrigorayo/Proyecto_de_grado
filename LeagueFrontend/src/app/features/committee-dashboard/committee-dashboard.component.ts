@@ -4,41 +4,40 @@ import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators, FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { MatchService } from '../../services/match.service';
-import { TournamentService } from '../../services/tournament.service'; // 👈 IMPORTANTE
+import { TournamentService } from '../../services/tournament.service';
+import { PlayerService } from '../../services/player.service';     // 👈 NUEVO
+import { MatchEventService } from '../../services/match-event.service'; // 👈 NUEVO
 
 @Component({
   selector: 'app-committee-dashboard',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './committee-dashboard.component.html',
-  styleUrls: ['./committee-dashboard.component.css']
+  //styleUrls: ['./committee-dashboard.component.css']
 })
 export class CommitteeDashboardComponent implements OnInit {
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private matchService = inject(MatchService);
-  private tournamentService = inject(TournamentService); // 👈 Inyectamos el servicio
+  private tournamentService = inject(TournamentService);
+  private playerService = inject(PlayerService);         // 👈 Inyectar
+  private matchEventService = inject(MatchEventService); // 👈 Inyectar
 
   // --- ESTADO ---
-  // Ya NO usamos ID fijo. Usamos estas señales:
-  tournaments = signal<any[]>([]); 
-  selectedTournamentId = signal<string>(''); 
-
+  tournaments = signal<any[]>([]);
+  selectedTournamentId = signal<string>('');
+  
   currentView = signal<string>('partidos');
   matchesList = signal<any[]>([]);
   isLoading = signal(false);
 
-  // Mocks (Visuales)
-  standingsList = signal([
-    { pos: 1, team: 'Los Gigantes', pj: 10, pg: 8, pe: 1, pp: 1, pts: 25 },
-    { pos: 2, team: 'Fuerza Verde', pj: 10, pg: 7, pe: 2, pp: 1, pts: 23 }
-  ]);
-  newsList = signal([
-    { id: 1, title: 'Sistema Conectado', date: 'Hoy', excerpt: 'Lectura de datos en tiempo real.', image: 'https://picsum.photos/id/100/400/250' },
-  ]);
+  // --- ESTADO PARA ACTA (JUGADORES Y EVENTOS) ---
+  homePlayers = signal<any[]>([]); // 👈 Lista jugadores Local
+  awayPlayers = signal<any[]>([]); // 👈 Lista jugadores Visita
+  matchEvents = signal<any[]>([]); // 👈 Lista de goles/tarjetas cargados
 
-  // Formulario
+  // Formulario Resultado Global
   selectedMatch = signal<any>(null);
   reportForm = this.fb.group({
       homeScore: [0, [Validators.required, Validators.min(0)]],
@@ -46,77 +45,156 @@ export class CommitteeDashboardComponent implements OnInit {
       incidents: ['']
   });
 
+  // Formulario para AGREGAR UN EVENTO (Gol/Tarjeta)
+  eventForm = this.fb.group({
+    playerId: ['', Validators.required],
+    type: ['0', Validators.required], // 0=Gol, 1=Amarilla, 2=Roja
+    minute: [0, [Validators.required, Validators.min(0), Validators.max(130)]]
+  });
+
   // Menú
   menuItems = signal([
     { id: 'dashboard', label: 'Dashboard', icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>' },
-    { id: 'partidos', label: 'Mis Partidos', icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' },
+    { id: 'partidos', label: 'Gestión de Resultados', icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>' },
   ]);
 
   ngOnInit() {
-    // Al iniciar, cargamos la lista de torneos
     this.loadTournaments();
   }
 
-  // 1. Cargar Torneos
+  // --- CARGA DE DATOS ---
   loadTournaments() {
     this.tournamentService.getAll().subscribe({
       next: (data) => {
         this.tournaments.set(data);
-        // Si hay torneos, seleccionamos el primero por defecto
         if (data.length > 0) {
           this.selectedTournamentId.set(data[0].id);
-          this.loadMatches(); // Y cargamos sus partidos
+          this.loadMatches();
         }
       },
-      error: (err) => console.error('Error cargando torneos', err)
+      error: (err) => console.error(err)
     });
   }
 
-  // 2. Detectar cambio de torneo en el Dropdown
   onTournamentChange(event: any) {
     this.selectedTournamentId.set(event.target.value);
     this.loadMatches();
   }
 
-  // 3. Cargar Partidos (Usando el ID seleccionado)
   loadMatches() {
-    const tournamentId = this.selectedTournamentId();
-    if (!tournamentId) return;
-
+    const tId = this.selectedTournamentId();
+    if (!tId) return;
     this.isLoading.set(true);
-    this.matchService.getMatchesByTournament(tournamentId).subscribe({
+    this.matchService.getMatchesByTournament(tId).subscribe({
       next: (data) => {
-        console.log('Partidos cargados:', data);
-        const formattedMatches = data.map(m => ({
+        // Mapeo seguro
+        const formatted = data.map(m => ({
           id: m.id,
           date: new Date(m.matchDate).toLocaleDateString(),
           time: new Date(m.matchDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
           home: m.homeTeamName || 'Local',
           away: m.awayTeamName || 'Visita',
+          homeTeamId: m.homeTeamId, // Importante para buscar jugadores
+          awayTeamId: m.awayTeamId, // Importante para buscar jugadores
           location: m.venue,
           status: m.status,
           statusLabel: this.getStatusLabel(m.status)
         }));
-        this.matchesList.set(formattedMatches);
+        this.matchesList.set(formatted);
         this.isLoading.set(false);
       },
-      error: (err) => {
-        console.error('Error cargando partidos', err);
-        this.isLoading.set(false);
-        this.matchesList.set([]); // Limpiamos la lista si falla
-      }
+      error: () => { this.isLoading.set(false); this.matchesList.set([]); }
     });
   }
 
-  // Helpers
-  getStatusLabel(status: number): string {
-    switch(status) {
-      case 0: return 'Pendiente';
-      case 1: return 'Jugando';
-      case 2: return 'Finalizado';
-      case 3: return 'Cancelado';
-      default: return 'Desconocido';
+  // --- GESTIÓN DEL ACTA (ABRIR FORMULARIO) ---
+  openReportForm(match: any) {
+    this.selectedMatch.set(match);
+    
+    // Si ya tiene resultado, lo cargamos
+    this.reportForm.patchValue({
+      homeScore: match.homeScore || 0,
+      awayScore: match.awayScore || 0,
+      incidents: '' // Idealmente traeríamos incidencias del backend si existieran
+    });
+    
+    this.eventForm.reset({ type: '0', minute: 0, playerId: '' });
+
+    // 1. Cargar Jugadores de ambos equipos para los dropdowns
+    this.loadTeamPlayers(match.homeTeamId, true);
+    this.loadTeamPlayers(match.awayTeamId, false);
+
+    // 2. Cargar eventos previos si existen
+    this.loadMatchEvents(match.id);
+
+    this.currentView.set('registrar-acta');
+  }
+
+  loadTeamPlayers(teamId: string, isHome: boolean) {
+    this.playerService.getPlayersByTeam(teamId).subscribe(players => {
+      if (isHome) this.homePlayers.set(players);
+      else this.awayPlayers.set(players);
+    });
+  }
+
+  loadMatchEvents(matchId: string) {
+    this.matchEventService.getEventsByMatch(matchId).subscribe(events => {
+      this.matchEvents.set(events);
+    });
+  }
+
+  // --- AGREGAR GOL / TARJETA ---
+  addEvent() {
+    if (this.eventForm.valid && this.selectedMatch()) {
+      const { playerId, type, minute } = this.eventForm.value;
+      const matchId = this.selectedMatch().id;
+
+      // Llamada al Backend
+      this.matchEventService.addEvent(matchId, playerId!, Number(type), minute!).subscribe({
+        next: () => {
+          // Recargar la lista de eventos
+          this.loadMatchEvents(matchId);
+          // Reset parcial
+          this.eventForm.patchValue({ minute: minute, type: '0', playerId: '' }); 
+        },
+        error: (e) => alert('Error al agregar evento: ' + (e.error?.error || e.message))
+      });
     }
+  }
+
+  // --- CERRAR ACTA (RESULTADO FINAL) ---
+  submitReport() {
+      if (this.reportForm.valid && this.selectedMatch()) {
+          const formVal = this.reportForm.value;
+          const matchId = this.selectedMatch().id;
+
+          const command = {
+            matchId: matchId,
+            homeScore: Number(formVal.homeScore),
+            awayScore: Number(formVal.awayScore),
+            incidents: formVal.incidents || ''
+          };
+
+          this.matchService.updateMatchResult(matchId, command).subscribe({
+            next: () => {
+              alert('✅ Acta Cerrada y Resultado Final Registrado');
+              this.loadMatches();
+              this.selectedMatch.set(null);
+              this.currentView.set('partidos');
+            },
+            error: (err) => alert(`❌ Error: ${err.error?.error || 'No se pudo guardar'}`)
+          });
+      }
+  }
+
+  // Utils
+  getStatusLabel(status: number): string {
+    return ['Pendiente', 'Jugando', 'Finalizado', 'Cancelado'][status] || 'Desconocido';
+  }
+  
+  // Mapeo visual para la tabla de eventos
+  getEventLabel(type: number): string {
+    return ['⚽ Gol', '🟨 Amarilla', '🟥 Roja', 'Autogol'][type] || 'Evento';
   }
 
   countPending() { return this.matchesList().filter(m => m.status === 0).length; }
@@ -132,46 +210,5 @@ export class CommitteeDashboardComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 
-  getPageTitle(): string {
-      const map: Record<string, string> = {
-          'dashboard': 'Panel Principal',
-          'partidos': 'Gestión de Resultados',
-          'registrar-acta': 'Registro de Resultados'
-      };
-      return map[this.currentView()] || 'Panel del Comité';
-  }
-
-  openReportForm(match: any) {
-      this.selectedMatch.set(match);
-      this.reportForm.reset({ homeScore: 0, awayScore: 0, incidents: '' });
-      this.currentView.set('registrar-acta');
-  }
-
-  submitReport() {
-      if (this.reportForm.valid && this.selectedMatch()) {
-          const formVal = this.reportForm.value;
-          const matchId = this.selectedMatch().id;
-
-          const command = {
-            matchId: matchId,
-            homeScore: Number(formVal.homeScore),
-            awayScore: Number(formVal.awayScore),
-            incidents: formVal.incidents || ''
-          };
-
-          this.matchService.updateMatchResult(matchId, command).subscribe({
-            next: () => {
-              alert('✅ Resultado registrado exitosamente');
-              this.loadMatches(); // Recargamos la lista actualizada
-              this.selectedMatch.set(null);
-              this.currentView.set('partidos');
-            },
-            error: (err) => {
-              console.error(err);
-              // Mostramos el error exacto que manda el backend
-              alert(`❌ Error: ${err.error?.error || 'No se pudo guardar'}`);
-            }
-          });
-      }
-  }
+  getPageTitle() { return 'Panel del Comité'; }
 }

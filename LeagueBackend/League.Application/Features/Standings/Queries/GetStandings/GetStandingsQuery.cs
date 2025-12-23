@@ -45,7 +45,7 @@ namespace League.Application.Features.Standings.Queries.GetStandings
             }).ToDictionary(s => s.TeamId);
 
             // D. Filtrar solo los partidos JUGADOS (Finalized = 2)
-            var finishedMatches = matches.Where(m => m.Status == MatchStatus.Finalized).ToList();
+            var finishedMatches = matches.Where(m => m.Status == MatchStatus.Finished).ToList();
 
             // E. Calcular puntos
             foreach (var match in finishedMatches)

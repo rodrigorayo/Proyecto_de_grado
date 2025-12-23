@@ -10,11 +10,12 @@ namespace League.Application.Features.Players.Commands.CreatePlayer
 {
     public record CreatePlayerCommand(
         string FullName,
-        string CI, // <--- CAMPO OBLIGATORIO
+        string CI,
         int Number,
         string Position,
         Guid TeamId,
-        DateTime? BirthDate
+        DateTime? BirthDate,
+        string? PhotoUrl // 👈 Agregado
     ) : IRequest<Guid>;
 
     public class CreatePlayerCommandHandler : IRequestHandler<CreatePlayerCommand, Guid>
@@ -34,7 +35,7 @@ namespace League.Application.Features.Players.Commands.CreatePlayer
             var team = await _teamRepository.GetByIdAsync(request.TeamId);
             if (team == null) throw new Exception("El equipo seleccionado no existe.");
 
-            // 2. VALIDAR QUE EL CI NO EXISTA (UNICIDAD)
+            // 2. Validar Unicidad CI
             var existingPlayer = await _playerRepository.GetByCiAsync(request.CI);
             if (existingPlayer != null)
             {
@@ -50,11 +51,12 @@ namespace League.Application.Features.Players.Commands.CreatePlayer
             // 4. Crear Entidad
             var player = new Player(
                 request.FullName,
-                request.CI, // Pasamos el CI
+                request.CI,
                 positionEnum,
                 request.Number,
                 request.TeamId,
-                request.BirthDate
+                request.BirthDate,
+                request.PhotoUrl // 👈 Enviamos la URL
             );
 
             await _playerRepository.AddAsync(player);

@@ -1,0 +1,411 @@
+<div class="flex min-h-screen bg-gray-50 font-sans text-gray-800">
+      
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full z-20">
+      <div class="h-16 flex items-center px-6 border-b border-gray-50">
+         <svg class="w-6 h-6 text-[#388e14] mr-2" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zm0 9l2.5-1.25L12 8.5l-2.5 1.25L12 11zm0 2.5l-5-2.5-5 2.5L12 22l10-8.5-5-2.5-5 2.5z"/></svg>
+         <span class="text-lg font-bold text-[#388e14] tracking-tight">LigaAdmin</span>
+      </div>
+      <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+         @for (item of menuItems(); track item.id) {
+           <a href="#" (click)="navigate($event, item.id)" 
+              class="flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-colors group"
+              [ngClass]="{'bg-gray-100 text-gray-900': currentView() === item.id, 'text-gray-500 hover:bg-gray-50 hover:text-gray-900': currentView() !== item.id}">
+              <span class="mr-3" [innerHTML]="item.icon"></span>
+              {{ item.label }}
+           </a>
+         }
+      </nav>
+      <div class="p-4 border-t border-gray-100">
+         <button (click)="logout()" class="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 rounded-lg transition-colors font-semibold text-sm shadow-sm">Cerrar Sesión</button>
+      </div>
+    </aside>
+
+    <div class="ml-64 flex-1 flex flex-col min-w-0">
+      <header class="bg-white border-b border-gray-200 h-16 px-8 flex items-center justify-between sticky top-0 z-10">
+         <h1 class="text-xl font-bold text-gray-800 capitalize">{{ currentView().replace('-', ' ') }}</h1>
+         <div class="flex items-center gap-4"><span class="text-sm font-medium text-gray-600">Admin</span><div class="w-9 h-9 bg-[#388e14] rounded-full flex items-center justify-center text-white font-bold">A</div></div>
+      </header>
+
+      <div class="p-8 pb-20">
+        
+        @if (currentView() === 'dashboard') {
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+             <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex items-start justify-between"><div><p class="text-sm font-medium text-gray-500 mb-1">Equipos</p><h3 class="text-3xl font-bold text-gray-900">{{ teamsList().length }}</h3></div><div class="p-2 bg-green-50 rounded-lg text-[#388e14]">⚽</div></div>
+             <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex items-start justify-between"><div><p class="text-sm font-medium text-gray-500 mb-1">Jugadores</p><h3 class="text-3xl font-bold text-gray-900">{{ globalPlayerCount() }}</h3></div><div class="p-2 bg-blue-50 rounded-lg text-blue-600">🏃</div></div>
+             <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm flex items-start justify-between"><div><p class="text-sm font-medium text-gray-500 mb-1">Torneos</p><h3 class="text-3xl font-bold text-gray-900">{{ tournamentsList().length }}</h3></div><div class="p-2 bg-purple-50 rounded-lg text-purple-600">🏆</div></div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+             <button (click)="currentView.set('registrar-equipo')" class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center gap-2 text-gray-600 hover:text-[#388e14]"><span class="font-bold text-2xl text-[#388e14]">+</span><span class="font-medium text-sm">Nuevo Equipo</span></button>
+             <button (click)="currentView.set('configuracion')" class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center gap-2 text-gray-600 hover:text-[#388e14]"><span class="font-bold text-2xl text-[#388e14]">+</span><span class="font-medium text-sm">Nuevo Torneo</span></button>
+             <button (click)="currentView.set('partidos')" class="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center gap-2 text-gray-600 hover:text-[#388e14]"><span class="font-bold text-2xl text-[#388e14]">+</span><span class="font-medium text-sm">Gestionar Partidos</span></button>
+         </div>
+
+        } @else if (currentView() === 'equipos') {
+          <div class="flex justify-between items-end mb-6">
+             <h2 class="text-2xl font-bold text-gray-900">Gestión de Equipos</h2>
+             <button (click)="startCreatingTeam()" class="bg-[#388e14] text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm">+ Registrar Equipo</button>
+          </div>
+          <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+             <table class="w-full text-left">
+                <thead class="bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase">
+                    <tr>
+                        <th class="px-6 py-3">Logo</th>
+                        <th class="px-6 py-3">Nombre</th>
+                        <th class="px-6 py-3">Categoría</th>
+                        <th class="px-6 py-3 text-right">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @for (team of teamsList(); track team.id) {
+                      <tr class="hover:bg-gray-50 text-sm">
+                         <td class="px-6 py-3">
+                             <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden border border-gray-200">
+                                @if(team.logoUrl) { <img [src]="team.logoUrl" class="w-full h-full object-cover"> } 
+                                @else { <span class="text-[8px] text-gray-400">Sin img</span> }
+                             </div>
+                         </td>
+                         <td class="px-6 py-4 font-medium">{{ team.name }}</td>
+                         <td class="px-6 py-4">{{ team.category }}</td>
+                         <td class="px-6 py-4 text-right">
+                             <button (click)="startEditingTeam(team)" class="text-blue-600 mr-2">Editar</button><button (click)="deleteTeam(team)" class="text-red-600">Borrar</button>
+                         </td>
+                      </tr>
+                  } @empty { <tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">Sin datos.</td></tr> }
+                </tbody>
+             </table>
+          </div>
+
+        } @else if (currentView() === 'registrar-equipo') {
+           <div class="max-w-2xl mx-auto bg-white p-8 rounded-xl border border-gray-200 shadow-sm">
+               <h2 class="text-xl font-bold text-gray-900 mb-6">{{ editingTeamId() ? 'Editar Equipo' : 'Registrar Nuevo Equipo' }}</h2>
+              <form [formGroup]="teamForm" (ngSubmit)="onSubmitTeam()" class="space-y-6">
+                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Escudo del Equipo</label>
+                    <div class="flex items-center gap-4">
+                        <div class="w-20 h-20 bg-gray-100 rounded-full border border-gray-200 flex items-center justify-center overflow-hidden shrink-0">
+                            @if (tempTeamLogoUrl()) { <img [src]="tempTeamLogoUrl()" class="w-full h-full object-cover"> } 
+                            @else { <span class="text-gray-400 text-xs">Sin logo</span> }
+                        </div>
+                        <div>
+                            <input type="file" (change)="onFileSelected($event, 'team')" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 cursor-pointer">
+                            @if (isUploading()) { <p class="text-xs text-blue-500 mt-1">Subiendo imagen...</p> }
+                        </div>
+                    </div>
+                 </div>
+                 <div><label class="block text-sm font-medium text-gray-700">Nombre</label><input formControlName="name" class="w-full border rounded-lg px-4 py-2"></div>
+                 <div><label class="block text-sm font-medium text-gray-700">Categoría</label><select formControlName="category" class="w-full border rounded-lg px-4 py-2 bg-white"><option>Primera A</option><option>Ascenso B</option><option>Senior</option></select></div>
+                 <div class="flex gap-4 pt-4"><button type="button" (click)="finalizeTeamAction()" class="flex-1 border rounded-lg py-2">Cancelar</button><button type="submit" [disabled]="teamForm.invalid || isUploading()" class="flex-1 bg-[#388e14] text-white rounded-lg py-2 disabled:opacity-50">Guardar</button></div>
+              </form>
+           </div>
+
+        } @else if (currentView() === 'jugadores') {
+           <div class="flex flex-col gap-6">
+              <div class="flex justify-between items-end">
+                 <h2 class="text-2xl font-bold text-gray-900">Gestión de Jugadores</h2>
+                 <button (click)="startCreatingPlayer()" class="bg-[#388e14] text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm">+ Nuevo Jugador</button>
+              </div>
+              <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex items-center gap-4">
+                 <label class="font-bold text-gray-700">Filtrar por Equipo:</label>
+                 <select [ngModel]="selectedTeamId()" (ngModelChange)="onTeamFilterChange($event)" class="border rounded-lg px-4 py-2 w-64 bg-white">
+                    <option [ngValue]="null" disabled selected>-- Selecciona --</option>
+                    @for (team of teamsList(); track team.id) { <option [value]="team.id">{{ team.name }}</option> }
+                 </select>
+              </div>
+              @if (selectedTeamId()) {
+                 <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                     <table class="w-full text-left">
+                       <thead class="bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase">
+                           <tr>
+                               <th class="px-6 py-3">Foto</th>
+                               <th class="px-6 py-3">Nombre</th>
+                               <th class="px-6 py-3">C.I.</th>
+                               <th class="px-6 py-3">Pos</th>
+                               <th class="px-6 py-3 text-right">Acciones</th>
+                           </tr>
+                       </thead>
+                       <tbody class="divide-y divide-gray-100">
+                           @for (player of playersList(); track player.id) {
+                             <tr class="hover:bg-gray-50 text-sm">
+                                <td class="px-6 py-3">
+                                    <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden border border-gray-200">
+                                       @if(player.photoUrl) { <img [src]="player.photoUrl" class="w-full h-full object-cover"> } 
+                                       @else { <span class="text-lg">👤</span> }
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 font-medium">{{ player.fullName }}</td><td class="px-6 py-4">{{ player.ci }}</td><td class="px-6 py-4">{{ player.positionLabel }}</td>
+                                <td class="px-6 py-4 text-right"><button (click)="startEditingPlayer(player)" class="text-blue-600 mr-2">Editar</button><button (click)="deletePlayer(player)" class="text-red-600">Borrar</button></td>
+                             </tr>
+                          } @empty { <tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">Sin jugadores.</td></tr> }
+                       </tbody>
+                    </table>
+                 </div>
+              } @else { <div class="p-12 text-center text-gray-400 bg-white border border-dashed rounded-lg">Selecciona un equipo.</div> }
+            </div>
+
+        } @else if (currentView() === 'registrar-jugador') {
+           <div class="max-w-2xl mx-auto bg-white p-8 rounded-xl border border-gray-200 shadow-sm">
+              <h2 class="text-xl font-bold text-gray-900 mb-6">{{ editingPlayerId() ? 'Editar Jugador' : 'Registrar Nuevo Jugador' }}</h2>
+              <form [formGroup]="playerForm" (ngSubmit)="onSubmitPlayer()" class="space-y-6">
+                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Foto del Jugador</label>
+                    <div class="flex items-center gap-4">
+                        <div class="w-20 h-20 bg-gray-100 rounded-full border border-gray-200 flex items-center justify-center overflow-hidden shrink-0">
+                            @if (tempPlayerPhotoUrl()) { <img [src]="tempPlayerPhotoUrl()" class="w-full h-full object-cover"> } 
+                            @else { <span class="text-gray-400 text-3xl">👤</span> }
+                        </div>
+                        <div>
+                            <input type="file" (change)="onFileSelected($event, 'player')" accept="image/*" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                            @if (isUploading()) { <p class="text-xs text-blue-500 mt-1">Subiendo...</p> }
+                        </div>
+                    </div>
+                 </div>
+                 <div><label class="block text-sm font-medium text-gray-700">Equipo</label><select formControlName="teamId" class="w-full border rounded-lg px-4 py-2 bg-white"><option value="" disabled>Selecciona</option>@for (t of teamsList(); track t.id) {<option [value]="t.id">{{ t.name }}</option>}</select></div>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2"><label class="block text-sm font-medium text-gray-700">Nombre</label><input formControlName="fullName" class="w-full border rounded-lg px-4 py-2"></div>
+                    <div><label class="block text-sm font-medium text-gray-700">C.I.</label><input formControlName="identityCard" class="w-full border rounded-lg px-4 py-2"></div>
+                    <div><label class="block text-sm font-medium text-gray-700">Dorsal</label><input type="number" formControlName="jerseyNumber" class="w-full border rounded-lg px-4 py-2"></div>
+                    <div><label class="block text-sm font-medium text-gray-700">Posición</label><select formControlName="position" class="w-full border rounded-lg px-4 py-2 bg-white"><option value="Goalkeeper">Arquero</option><option value="Defender">Defensor</option><option value="Midfielder">Medio</option><option value="Forward">Delantero</option></select></div>
+                    <div><label class="block text-sm font-medium text-gray-700">Fecha Nac.</label><input type="date" formControlName="birthDate" class="w-full border rounded-lg px-4 py-2"></div>
+                 </div>
+                 <div class="flex gap-4 pt-4"><button type="button" (click)="finalizePlayerAction()" class="flex-1 border rounded-lg py-2">Cancelar</button><button type="submit" [disabled]="playerForm.invalid || isUploading()" class="flex-1 bg-[#388e14] text-white rounded-lg py-2 disabled:opacity-50">Guardar</button></div>
+              </form>
+           </div>
+
+        } @else if (currentView() === 'partidos') {
+           <div class="flex flex-col gap-6">
+              <div class="flex justify-between items-end">
+                  <div><h2 class="text-2xl font-bold text-gray-900">Partidos</h2><p class="text-gray-500 text-sm">Fixture y Programación</p></div>
+                 <button (click)="startProgrammingMatch()" [disabled]="!selectedTournamentIdMatchView()" class="bg-[#388e14] text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm disabled:opacity-50">+ Programar Partido</button>
+              </div>
+
+              <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex items-center gap-4">
+                  <label class="font-bold text-gray-700">Torneo:</label>
+                 <select [ngModel]="selectedTournamentIdMatchView()" (ngModelChange)="onTournamentFilterChange($event)" class="border rounded-lg px-4 py-2 w-64 bg-white">
+                    <option [ngValue]="null" disabled selected>-- Elige un Torneo --</option>
+                    @for (t of tournamentsList(); track t.id) { <option [value]="t.id">{{ t.name }}</option> }
+                 </select>
+              </div>
+
+              @if (selectedTournamentIdMatchView()) {
+                 <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead class="bg-white border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase"><tr><th class="px-6 py-3">Encuentro</th><th class="px-6 py-3">Estado</th><th class="px-6 py-3 text-right">Acciones</th></tr></thead>
+                       <tbody class="divide-y divide-gray-100">
+                          @for (match of matchesList(); track match.id) {
+                             <tr class="hover:bg-gray-50 text-sm">
+                                <td class="px-6 py-4">
+                                    <div class="flex flex-col items-center">
+                                      <div class="flex items-center gap-2 font-bold text-gray-900">
+                                         <span>{{ match.homeTeam?.name || 'Local' }}</span>
+                                         <span class="text-gray-400 font-light">vs</span>
+                                         <span>{{ match.awayTeam?.name || 'Visita' }}</span>
+                                      </div>
+                                      <span class="text-xs text-gray-500">{{ match.matchDate | date:'dd/MM HH:mm' }}</span>
+                                   </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                   <span class="px-2 py-1 rounded text-xs font-bold" [ngClass]="match.status === 0 ? 'bg-blue-100 text-blue-800' : (match.status === 2 ? 'bg-green-100 text-green-800' : 'bg-gray-200')">
+                                      {{ getMatchStatus(match.status) }}
+                                   </span>
+                                   @if (match.status === 2) { <div class="text-center font-mono font-bold mt-1">{{ match.homeScore }} - {{ match.awayScore }}</div> }
+                                </td>
+                                <td class="px-6 py-4 text-right space-x-2">
+                                    <button (click)="manageMatch(match)" class="text-blue-600 hover:text-blue-800 font-bold text-xs border border-blue-200 px-3 py-1.5 rounded hover:bg-blue-50 transition-colors">
+                                        {{ match.status === 2 ? 'Ver Acta' : 'Gestionar' }}
+                                    </button>
+                                </td>
+                             </tr>
+                          } @empty { <tr><td colspan="4" class="px-6 py-12 text-center text-gray-500">No hay partidos.</td></tr> }
+                       </tbody>
+                    </table>
+                 </div>
+              } @else { <div class="p-12 text-center text-gray-400 bg-white border border-dashed rounded-lg">Selecciona un torneo.</div> }
+           </div>
+
+        } @else if (currentView() === 'programar-partido') {
+           <div class="max-w-3xl mx-auto bg-white p-8 rounded-xl border border-gray-200 shadow-sm">
+              <h2 class="text-xl font-bold text-gray-900 mb-6">Programar Nuevo Partido</h2>
+              <form [formGroup]="matchForm" (ngSubmit)="onSubmitMatch()" class="space-y-6">
+                  <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <span class="text-xs font-bold text-gray-500 uppercase">Torneo Seleccionado</span>
+                    <p class="font-bold text-gray-900">{{ getTournamentName(selectedTournamentIdMatchView()) }}</p>
+                 </div>
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Local</label><select formControlName="homeTeamId" class="w-full border rounded-lg px-4 py-2 bg-white"><option value="" disabled>Selecciona Local</option>@for (t of teamsList(); track t.id) { <option [value]="t.id">{{ t.name }} ({{ t.category }})</option> }</select></div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Visitante</label><select formControlName="awayTeamId" class="w-full border rounded-lg px-4 py-2 bg-white"><option value="" disabled>Selecciona Visitante</option>@for (t of teamsList(); track t.id) { <option [value]="t.id">{{ t.name }} ({{ t.category }})</option> }</select></div>
+                 </div>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Fecha y Hora</label><input type="datetime-local" formControlName="matchDate" class="w-full border rounded-lg px-4 py-2"></div>
+                    <div><label class="block text-sm font-medium text-gray-700 mb-1">Lugar / Estadio</label><input type="text" formControlName="venue" class="w-full border rounded-lg px-4 py-2" placeholder="Ej: Cancha Principal"></div>
+                 </div>
+                 @if (matchForm.hasError('sameTeam')) { <div class="p-3 bg-red-50 text-red-700 text-sm rounded-lg">Error: Un equipo no puede jugar contra sí mismo.</div> }
+                 <div class="flex gap-4 pt-4"><button type="button" (click)="currentView.set('partidos')" class="flex-1 border rounded-lg py-2">Cancelar</button><button type="submit" [disabled]="matchForm.invalid" class="flex-1 bg-[#388e14] text-white rounded-lg font-bold disabled:opacity-50">Programar</button></div>
+              </form>
+           </div>
+
+        } @else if (currentView() === 'gestionar-partido') {
+           <div class="flex flex-col gap-6 animate-fade-in">
+               <div class="flex items-center gap-4">
+                   <button (click)="currentView.set('partidos')" class="text-gray-400 hover:text-[#388e14] transition-colors">
+                       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                   </button>
+                   <div>
+                       <h2 class="text-2xl font-bold text-gray-900">Acta del Partido</h2>
+                       @if (selectedMatch()?.status === 2) {
+                           <span class="text-xs bg-green-100 text-green-800 font-bold px-2 py-0.5 rounded border border-green-200">FINALIZADO (SOLO LECTURA)</span>
+                       }
+                   </div>
+               </div>
+               
+               <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                   <div class="lg:col-span-2 space-y-6">
+                       @if (selectedMatch()?.status !== 2) {
+                           <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                               <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">Registrar Evento (Goles / Tarjetas)</h3>
+                               <form [formGroup]="eventForm" (ngSubmit)="addEvent()" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                                   <div class="md:col-span-2">
+                                       <label class="block text-xs font-bold text-gray-500 mb-1">Jugador</label>
+                                       <select formControlName="playerId" class="w-full border rounded px-3 py-2 text-sm bg-gray-50">
+                                           <option value="" disabled>Selecciona jugador...</option>
+                                           <optgroup [label]="selectedMatch()?.homeTeamName || 'Local'">
+                                               @for(p of matchSquads().home; track p.id) { <option [value]="p.id">{{ p.fullName }} (#{{ p.number }})</option> }
+                                           </optgroup>
+                                           <optgroup [label]="selectedMatch()?.awayTeamName || 'Visita'">
+                                               @for(p of matchSquads().away; track p.id) { <option [value]="p.id">{{ p.fullName }} (#{{ p.number }})</option> }
+                                           </optgroup>
+                                       </select>
+                                   </div>
+                                   <div>
+                                       <label class="block text-xs font-bold text-gray-500 mb-1">Evento</label>
+                                       <select formControlName="type" class="w-full border rounded px-3 py-2 text-sm bg-gray-50">
+                                           <option value="0">⚽ Gol</option>
+                                           <option value="1">🟨 Amarilla</option>
+                                           <option value="2">🟥 Roja</option>
+                                       </select>
+                                   </div>
+                                   <div>
+                                       <label class="block text-xs font-bold text-gray-500 mb-1">Minuto</label>
+                                       <div class="flex gap-2">
+                                           <input type="number" formControlName="minute" class="w-full border rounded px-3 py-2 text-sm" placeholder="Ej: 45">
+                                           <button type="submit" [disabled]="eventForm.invalid" class="bg-blue-600 text-white px-3 rounded hover:bg-blue-700 font-bold">+</button>
+                                       </div>
+                                   </div>
+                               </form>
+                           </div>
+                       }
+
+                       <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                           <div class="bg-gray-50 px-6 py-3 border-b border-gray-200 font-bold text-xs text-gray-500 uppercase">Resumen del Partido</div>
+                           <table class="w-full text-sm text-left">
+                               <tbody class="divide-y divide-gray-100">
+                                   @for(evt of matchEvents(); track evt.id) {
+                                       <tr class="hover:bg-gray-50">
+                                           <td class="px-6 py-3 font-mono font-bold text-gray-500 w-16 text-right">{{ evt.minute }}'</td>
+                                           <td class="px-6 py-3 font-medium">{{ getEventLabel(evt.type) }}</td>
+                                           <td class="px-6 py-3 text-gray-700">{{ evt.player?.fullName }}</td>
+                                       </tr>
+                                   } @empty {
+                                       <tr><td colspan="3" class="px-6 py-8 text-center text-gray-400 italic">No hay eventos registrados aún.</td></tr>
+                                   }
+                               </tbody>
+                           </table>
+                       </div>
+                   </div>
+
+                   <div class="space-y-6">
+                       <form [formGroup]="resultForm" (ngSubmit)="closeMatchReport()" class="bg-white p-6 rounded-xl border border-gray-200 shadow-lg sticky top-24">
+                           <h3 class="font-bold text-gray-900 mb-6 text-center text-lg">Marcador Final</h3>
+                           <div class="flex items-center justify-between gap-4 mb-8">
+                               <div class="text-center flex-1">
+                                   <label class="block text-xs font-bold text-gray-500 mb-2 truncate">{{ selectedMatch()?.homeTeamName }}</label>
+                                   <input type="number" formControlName="homeScore" class="w-20 h-20 mx-auto text-center text-4xl font-black border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-[#388e14]/20 focus:border-[#388e14] bg-gray-50 disabled:bg-gray-100 disabled:text-gray-500" [attr.disabled]="selectedMatch()?.status === 2 ? true : null">
+                               </div>
+                               <span class="text-2xl font-bold text-gray-300">-</span>
+                               <div class="text-center flex-1">
+                                   <label class="block text-xs font-bold text-gray-500 mb-2 truncate">{{ selectedMatch()?.awayTeamName }}</label>
+                                   <input type="number" formControlName="awayScore" class="w-20 h-20 mx-auto text-center text-4xl font-black border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-[#388e14]/20 focus:border-[#388e14] bg-gray-50 disabled:bg-gray-100 disabled:text-gray-500" [attr.disabled]="selectedMatch()?.status === 2 ? true : null">
+                               </div>
+                           </div>
+
+                           <div class="mb-6">
+                               <label class="block text-xs font-bold text-gray-500 mb-2">Observaciones / Incidencias</label>
+                               <textarea formControlName="incidents" rows="4" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-[#388e14]/20 disabled:bg-gray-100" [attr.disabled]="selectedMatch()?.status === 2 ? true : null"></textarea>
+                           </div>
+
+                           <div class="mb-6 bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-xl border border-purple-100">
+                               <div class="flex justify-between items-center mb-2">
+                                   <label class="block text-xs font-bold text-purple-700">🤖 Crónica del Partido (IA)</label>
+                                   
+                                   @if (!selectedMatch()?.chronicle) {
+                                       <button type="button" (click)="generateAIChronicle()" [disabled]="isGeneratingAI() || selectedMatch()?.status !== 2" 
+                                           class="bg-purple-600 hover:bg-purple-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold shadow-sm flex items-center gap-2 disabled:opacity-50 transition-all">
+                                           @if(isGeneratingAI()){ <span>Pensando...</span> } @else { <span>✨ Generar con IA</span> }
+                                       </button>
+                                   }
+                               </div>
+
+                               @if (selectedMatch()?.chronicle) {
+                                   <div class="bg-white p-4 rounded-lg border border-purple-100 text-sm text-gray-700 leading-relaxed shadow-sm whitespace-pre-line max-h-60 overflow-y-auto">
+                                       {{ selectedMatch().chronicle }}
+                                   </div>
+                                   <div class="mt-2 text-right">
+                                        <button type="button" (click)="generateAIChronicle()" class="text-xs text-purple-500 underline hover:text-purple-700">Regenerar Crónica</button>
+                                   </div>
+                               } @else {
+                                   <p class="text-xs text-gray-400 italic">La crónica estará disponible cuando finalices el partido y presiones el botón mágico.</p>
+                               }
+                           </div>
+                           @if (selectedMatch()?.status !== 2) {
+                               <button type="submit" [disabled]="resultForm.invalid" class="w-full bg-[#388e14] hover:bg-[#2e7510] text-white py-3 rounded-lg font-bold shadow-md transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">CERRAR ACTA</button>
+                           } @else {
+                               <button type="button" (click)="currentView.set('partidos')" class="w-full border border-gray-300 text-gray-600 hover:bg-gray-50 py-3 rounded-lg font-bold transition-colors">Volver a Lista</button>
+                           }
+                       </form>
+                   </div>
+               </div>
+           </div>
+
+        } @else if (currentView() === 'configuracion') {
+           <div class="flex flex-col gap-6">
+              <div><h2 class="text-2xl font-bold text-gray-900">Gestión de Torneos</h2><p class="text-gray-500 text-sm">Crea y administra los campeonatos.</p></div>
+               <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                 @if (showNewTournamentForm() || editingTournamentId()) {
+                    <form [formGroup]="tournamentForm" (ngSubmit)="onSubmitTournament()">
+                       <h3 class="font-bold text-gray-900 mb-4">{{ editingTournamentId() ? 'Editar Torneo' : 'Nuevo Torneo' }}</h3>
+                       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                          <div class="md:col-span-3"><label class="text-xs font-bold text-gray-500">Nombre</label><input formControlName="name" class="w-full border rounded px-3 py-2"></div>
+                          <div><label class="text-xs font-bold text-gray-500">Inicio</label><input type="date" formControlName="startDate" class="w-full border rounded px-3 py-2"></div>
+                          <div><label class="text-xs font-bold text-gray-500">Fin (Opcional)</label><input type="date" formControlName="endDate" class="w-full border rounded px-3 py-2"></div>
+                       </div>
+                       <div class="flex gap-2 justify-end">
+                          <button type="button" (click)="cancelTournamentEdit()" class="text-gray-500 font-medium text-sm">Cancelar</button>
+                          <button type="submit" [disabled]="tournamentForm.invalid" class="bg-[#388e14] text-white px-4 py-2 rounded text-sm font-bold">Guardar</button>
+                       </div>
+                    </form>
+                 } @else {
+                    <div class="flex justify-between items-center">
+                       <div><h3 class="font-bold text-gray-900">Panel de Control</h3><p class="text-sm text-gray-500">Gestiona los torneos activos e históricos.</p></div>
+                       <button (click)="startCreatingTournament()" class="bg-[#388e14] text-white px-4 py-2 rounded text-sm font-bold">+ Crear Torneo</button>
+                    </div>
+                 }
+              </div>
+               <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                 <table class="w-full text-left">
+                    <thead class="bg-gray-50 border-b text-xs font-bold text-gray-500 uppercase"><tr><th class="px-6 py-3">Nombre</th><th class="px-6 py-3">Fechas</th><th class="px-6 py-3">Estado</th><th class="px-6 py-3 text-right">Acciones</th></tr></thead>
+                    <tbody class="divide-y divide-gray-100">
+                        @for (t of tournamentsList(); track t.id) {
+                          <tr class="hover:bg-gray-50 text-sm">
+                             <td class="px-6 py-4 font-medium">{{ t.name }}</td><td class="px-6 py-4 text-gray-600">{{ t.startDate | date:'shortDate' }} - {{ t.endDate ? (t.endDate | date:'shortDate') : '...' }}</td>
+                             <td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs font-bold" [ngClass]="(!t.endDate || isFuture(t.endDate)) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'">{{ (!t.endDate || isFuture(t.endDate)) ? 'ACTIVO' : 'FINALIZADO' }}</span></td>
+                             <td class="px-6 py-4 text-right"><button (click)="startEditingTournament(t)" class="text-blue-600 mr-2">Editar</button><button (click)="deleteTournament(t)" class="text-red-600">Borrar</button></td>
+                          </tr>
+                       } @empty { <tr><td colspan="4" class="px-6 py-8 text-center text-gray-500">No hay torneos.</td></tr> }
+                    </tbody>
+                 </table>
+              </div>
+           </div>
+        } @else { <div class="p-12 text-center text-gray-500">Vista en construcción</div> }
+
+      </div>
+    </div>
+</div>

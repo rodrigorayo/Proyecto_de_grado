@@ -12,7 +12,6 @@ namespace League.Domain.Entities
         [MaxLength(100)]
         public string FullName { get; private set; }
 
-        // El CI es obligatorio y servirá para validar unicidad
         [Required]
         [MaxLength(20)]
         public string CI { get; private set; }
@@ -22,6 +21,10 @@ namespace League.Domain.Entities
         public int Number { get; private set; }
 
         public DateTime? BirthDate { get; private set; }
+
+        // 👇 NUEVO: Foto del Jugador
+        [MaxLength(500)]
+        public string? PhotoUrl { get; private set; }
 
         // RELACIONES
         [Required]
@@ -36,11 +39,10 @@ namespace League.Domain.Entities
         public int YellowCards { get; private set; }
         public int RedCards { get; private set; }
 
-        // Constructor vacío para EF Core
         protected Player() { }
 
-        // Constructor para CREAR
-        public Player(string fullName, string ci, PlayerPosition position, int number, Guid teamId, DateTime? birthDate = null)
+        // Constructor para CREAR (Actualizado)
+        public Player(string fullName, string ci, PlayerPosition position, int number, Guid teamId, DateTime? birthDate = null, string? photoUrl = null)
         {
             if (string.IsNullOrWhiteSpace(fullName)) throw new DomainException("El nombre es obligatorio.");
             if (string.IsNullOrWhiteSpace(ci)) throw new DomainException("El CI es obligatorio.");
@@ -53,10 +55,11 @@ namespace League.Domain.Entities
             Number = number;
             TeamId = teamId;
             BirthDate = birthDate;
+            PhotoUrl = photoUrl; // 👈 Asignamos foto
         }
 
-        // Método para ACTUALIZAR
-        public void UpdateDetails(string fullName, string ci, int number, PlayerPosition position, DateTime? birthDate)
+        // Método para ACTUALIZAR (Actualizado)
+        public void UpdateDetails(string fullName, string ci, int number, PlayerPosition position, DateTime? birthDate, string? photoUrl)
         {
             if (string.IsNullOrWhiteSpace(fullName)) throw new DomainException("El nombre es obligatorio.");
             if (string.IsNullOrWhiteSpace(ci)) throw new DomainException("El CI es obligatorio.");
@@ -66,8 +69,9 @@ namespace League.Domain.Entities
             Number = number;
             Position = position;
             BirthDate = birthDate;
+            PhotoUrl = photoUrl; // 👈 Actualizamos foto
 
-            Touch(); // Actualiza fecha de modificación
+            Touch();
         }
 
         // Métodos de estadísticas

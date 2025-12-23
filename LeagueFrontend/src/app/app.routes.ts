@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './login.component';
-import { AdminDashboardComponent } from './admin-dashboard.component';
-import { DelegateDashboardComponent } from './delegate-dashboard.component';
+import { AdminDashboardComponent } from './features/admin-dashboard/admin-dashboard.component'; // 👈 RUTA NUEVA
+import { DelegateDashboardComponent } from './features/delegate-dashboard/delegate-dashboard.component';
 import { RefereeDashboardComponent } from './referee-dashboard.component';
 import { authGuard } from './auth.guard';
 
@@ -29,25 +29,11 @@ export const routes: Routes = [
   // --- LOGIN ---
   { path: 'login', component: LoginComponent },
 
-  // --- ZONA PRIVADA (Admin) ---
-  { 
-    path: 'admin', 
-    component: AdminDashboardComponent, 
-    canActivate: [authGuard] 
-  },
-  
-  // --- ZONA PRIVADA (Comité) ---
-  // Esta es la ruta crítica que faltaba
-  { 
-    path: 'committee', 
-    component: CommitteeDashboardComponent, 
-    canActivate: [authGuard] 
-  },
-
-  // --- OTROS ROLES ---
-  { path: 'delegate', component: DelegateDashboardComponent },
+  // --- ZONA PRIVADA ---
+  { path: 'admin', component: AdminDashboardComponent, canActivate: [authGuard] },
+  { path: 'committee', component: CommitteeDashboardComponent, canActivate: [authGuard] },
+  { path: 'delegate', component: DelegateDashboardComponent, canActivate: [authGuard] },
   { path: 'referee', component: RefereeDashboardComponent },
 
-  // --- FALLBACK (Si no encuentra ruta, va al inicio) ---
   { path: '**', redirectTo: '' }
 ];

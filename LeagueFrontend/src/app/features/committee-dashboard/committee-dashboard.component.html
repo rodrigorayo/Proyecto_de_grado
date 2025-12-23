@@ -1,5 +1,4 @@
 <div class="flex min-h-screen bg-white font-sans text-gray-800">
-      
     <aside class="w-64 bg-white border-r border-gray-100 flex flex-col fixed h-full z-20">
        <div class="h-16 flex items-center px-6 border-b border-gray-50">
           <svg class="w-6 h-6 text-[#4a9f24] mr-2" viewBox="0 0 24 24" fill="currentColor">
@@ -7,31 +6,24 @@
           </svg>
           <span class="text-xl font-bold text-[#4a9f24] tracking-tight">Comité Liga</span>
        </div>
-
        <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
            @for (item of menuItems(); track item.id) {
              <a href="#" (click)="navigate($event, item.id)"
                 class="flex items-center px-3 py-3 rounded-lg text-sm font-medium transition-colors group"
-                [ngClass]="{
-                  'bg-gray-100 text-gray-900': currentView() === item.id,
-                  'text-gray-500 hover:bg-gray-50 hover:text-gray-900': currentView() !== item.id
-                }">
+                [ngClass]="{'bg-gray-100 text-gray-900': currentView() === item.id, 'text-gray-500 hover:bg-gray-50 hover:text-gray-900': currentView() !== item.id}">
                 <span class="mr-3" [innerHTML]="item.icon"></span>
                 {{ item.label }}
              </a>
            }
        </nav>
-
        <div class="p-4 border-t border-gray-100">
            <button (click)="logout()" class="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 rounded-lg transition-colors font-semibold text-sm shadow-sm">
-               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
                Cerrar Sesión
            </button>
        </div>
     </aside>
 
     <div class="ml-64 flex-1 flex flex-col min-w-0 bg-white">
-       
        <header class="h-16 border-b border-gray-100 flex items-center justify-between px-8 bg-white sticky top-0 z-10">
           <h1 class="text-lg font-bold text-gray-800">{{ getPageTitle() }}</h1>
           <div class="flex items-center gap-3">
@@ -73,16 +65,6 @@
                      </div>
                      <p class="text-sm font-semibold text-gray-900 mb-1">Partidos Finalizados</p>
                    </div>
-                   
-                   <div class="bg-white p-6 rounded-lg border border-gray-100 shadow-sm flex flex-col items-start hover:shadow-md transition-shadow">
-                     <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-500 mb-4">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                     </div>
-                     <div class="flex items-baseline gap-2 mb-1">
-                       <h3 class="text-4xl font-bold text-gray-900">0</h3>
-                     </div>
-                     <p class="text-sm font-semibold text-gray-900 mb-1">Incidencias</p>
-                   </div>
                </div>
                
                <div class="flex gap-4 mb-10">
@@ -95,8 +77,7 @@
              } @else if (currentView() === 'partidos') {
                <div class="flex flex-col gap-6">
                    <div class="flex justify-between items-center flex-wrap gap-4">
-                       <h2 class="text-2xl font-bold text-gray-900">Listado de Partidos</h2>
-                       
+                       <h2 class="text-2xl font-bold text-gray-900">Gestión de Resultados</h2>
                        <div class="flex items-center gap-2">
                            <label class="text-sm font-medium text-gray-600">Torneo:</label>
                            <select 
@@ -114,52 +95,27 @@
                    </div>
 
                    <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-                       <div class="overflow-x-auto">
-                           <table class="w-full text-left">
-                               <thead>
-                                   <tr class="text-xs text-gray-500 border-b border-gray-100 bg-gray-50/50 uppercase tracking-wider">
-                                       <th class="px-6 py-4">Fecha/Hora</th>
-                                       <th class="px-6 py-4">Local</th>
-                                       <th class="px-6 py-4">Visitante</th>
-                                       <th class="px-6 py-4">Lugar</th>
-                                       <th class="px-6 py-4 text-center">Acción</th>
+                       <table class="w-full text-left">
+                           <thead class="bg-gray-50 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase">
+                               <tr><th class="px-6 py-4">Fecha</th><th class="px-6 py-4">Encuentro</th><th class="px-6 py-4">Estado</th><th class="px-6 py-4 text-center">Acción</th></tr>
+                           </thead>
+                           <tbody class="divide-y divide-gray-100">
+                               @for (match of matchesList(); track match.id) {
+                                   <tr class="hover:bg-gray-50 text-sm">
+                                       <td class="px-6 py-4">{{ match.date }} <span class="text-gray-400 text-xs block">{{ match.time }}</span></td>
+                                       <td class="px-6 py-4 font-bold text-gray-800">{{ match.home }} <span class="font-normal text-gray-400">vs</span> {{ match.away }}</td>
+                                       <td class="px-6 py-4"><span class="px-2 py-1 rounded text-xs font-bold border" [ngClass]="match.status===0?'bg-yellow-50 text-yellow-700 border-yellow-200':(match.status===2?'bg-green-50 text-green-700 border-green-200':'bg-gray-100')">{{ match.statusLabel }}</span></td>
+                                       <td class="px-6 py-4 text-center">
+                                           @if(match.status !== 2) {
+                                               <button (click)="openReportForm(match)" class="text-green-600 hover:text-green-800 font-bold text-xs border border-green-200 px-3 py-1.5 rounded hover:bg-green-50 transition-colors">Registrar Acta</button>
+                                           } @else {
+                                               <button (click)="openReportForm(match)" class="text-gray-600 hover:text-gray-800 font-medium text-xs border border-gray-200 px-3 py-1.5 rounded hover:bg-gray-50">Ver Acta</button>
+                                           }
+                                       </td>
                                    </tr>
-                               </thead>
-                               <tbody class="divide-y divide-gray-100">
-                                   @for (match of matchesList(); track match.id) {
-                                       <tr class="text-sm hover:bg-gray-50 transition-colors">
-                                           <td class="px-6 py-4">
-                                               <div class="flex flex-col">
-                                                   <span class="font-bold text-gray-900">{{ match.date }}</span>
-                                                   <span class="text-xs text-gray-500">{{ match.time }}</span>
-                                               </div>
-                                           </td>
-                                           <td class="px-6 py-4 font-medium text-gray-800">{{ match.home }}</td>
-                                           <td class="px-6 py-4 font-medium text-gray-800">{{ match.away }}</td>
-                                           <td class="px-6 py-4 text-gray-600">{{ match.location }}</td>
-                                           <td class="px-6 py-4 text-center">
-                                               @if (match.statusLabel === 'Pendiente') {
-                                                   <button (click)="openReportForm(match)" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-bold rounded shadow-sm text-white bg-[#4a9f24] hover:bg-[#3d8b1e] transition-colors focus:outline-none">
-                                                       Registrar Acta
-                                                   </button>
-                                               } @else {
-                                                   <button disabled class="inline-flex items-center px-3 py-1.5 border border-gray-200 bg-gray-50 text-gray-400 text-xs font-bold rounded cursor-not-allowed">
-                                                       {{ match.statusLabel }}
-                                                   </button>
-                                               }
-                                           </td>
-                                       </tr>
-                                   }
-                                   @if (matchesList().length === 0) {
-                                       <tr>
-                                           <td colspan="5" class="px-6 py-8 text-center text-gray-500">
-                                               No se encontraron partidos para el torneo seleccionado.
-                                           </td>
-                                       </tr>
-                                   }
-                               </tbody>
-                           </table>
-                       </div>
+                               } @empty { <tr><td colspan="4" class="p-8 text-center text-gray-500">No hay partidos.</td></tr> }
+                           </tbody>
+                       </table>
                    </div>
                 </div>
 
@@ -169,59 +125,104 @@
                        <button (click)="currentView.set('partidos')" class="text-gray-400 hover:text-[#4a9f24] transition-colors">
                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                        </button>
-                       <h2 class="text-2xl font-bold text-gray-900">Registrar Acta del Partido</h2>
+                       <div>
+                           <h2 class="text-2xl font-bold text-gray-900">Acta: {{ selectedMatch()?.home }} vs {{ selectedMatch()?.away }}</h2>
+                           @if (selectedMatch()?.status === 2) {
+                               <span class="text-xs bg-green-100 text-green-800 font-bold px-2 py-0.5 rounded border border-green-200">FINALIZADO (SOLO LECTURA)</span>
+                           }
+                       </div>
                    </div>
 
-                   @if (selectedMatch()) {
-                       <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-                           <div class="bg-gray-50 px-8 py-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
-                               <div class="text-center md:text-left">
-                                   <h3 class="text-lg font-bold text-gray-800">{{ selectedMatch()!.home }} vs {{ selectedMatch()!.away }}</h3>
-                                   <p class="text-sm text-gray-500">{{ selectedMatch()!.date }} • {{ selectedMatch()!.location }}</p>
+                   <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                       
+                       <div class="lg:col-span-2 space-y-6">
+                           @if (selectedMatch()?.status !== 2) {
+                               <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+                                   <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">Registrar Evento (Goles / Tarjetas)</h3>
+                                   <form [formGroup]="eventForm" (ngSubmit)="addEvent()" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                                       <div class="md:col-span-2">
+                                           <label class="block text-xs font-bold text-gray-500 mb-1">Jugador</label>
+                                           <select formControlName="playerId" class="w-full border rounded px-3 py-2 text-sm bg-gray-50">
+                                               <option value="" disabled>Selecciona jugador...</option>
+                                               <optgroup [label]="selectedMatch()?.home">
+                                                   @for(p of homePlayers(); track p.id) { <option [value]="p.id">{{ p.fullName }} (#{{ p.number }})</option> }
+                                               </optgroup>
+                                               <optgroup [label]="selectedMatch()?.away">
+                                                   @for(p of awayPlayers(); track p.id) { <option [value]="p.id">{{ p.fullName }} (#{{ p.number }})</option> }
+                                               </optgroup>
+                                           </select>
+                                       </div>
+                                       <div>
+                                           <label class="block text-xs font-bold text-gray-500 mb-1">Evento</label>
+                                           <select formControlName="type" class="w-full border rounded px-3 py-2 text-sm bg-gray-50">
+                                               <option value="0">⚽ Gol</option>
+                                               <option value="1">🟨 Amarilla</option>
+                                               <option value="2">🟥 Roja</option>
+                                           </select>
+                                       </div>
+                                       <div>
+                                           <label class="block text-xs font-bold text-gray-500 mb-1">Minuto</label>
+                                           <div class="flex gap-2">
+                                               <input type="number" formControlName="minute" class="w-full border rounded px-3 py-2 text-sm" placeholder="Ej: 45">
+                                               <button type="submit" [disabled]="eventForm.invalid" class="bg-blue-600 text-white px-3 rounded hover:bg-blue-700 font-bold">+</button>
+                                           </div>
+                                       </div>
+                                   </form>
                                </div>
-                               <div class="bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm">
-                                   <span class="text-xs font-bold text-gray-400 uppercase tracking-wide">ID Partido</span>
-                                   <span class="ml-2 font-mono font-bold text-gray-800">#{{ selectedMatch()!.id.substring(0,8) }}...</span>
-                               </div>
-                           </div>
+                           }
 
-                           <form [formGroup]="reportForm" (ngSubmit)="submitReport()" class="p-8 space-y-8">
+                           <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                               <div class="bg-gray-50 px-6 py-3 border-b border-gray-200 font-bold text-xs text-gray-500 uppercase">Resumen del Partido</div>
+                               <table class="w-full text-sm text-left">
+                                   <tbody class="divide-y divide-gray-100">
+                                       @for(evt of matchEvents(); track evt.id) {
+                                           <tr class="hover:bg-gray-50">
+                                               <td class="px-6 py-3 font-mono font-bold text-gray-500 w-16 text-right">{{ evt.minute }}'</td>
+                                               <td class="px-6 py-3 font-medium">{{ getEventLabel(evt.type) }}</td>
+                                               <td class="px-6 py-3 text-gray-700">{{ evt.player?.fullName }}</td>
+                                           </tr>
+                                       } @empty {
+                                           <tr><td colspan="3" class="px-6 py-8 text-center text-gray-400 italic">No hay eventos registrados aún.</td></tr>
+                                       }
+                                   </tbody>
+                               </table>
+                           </div>
+                       </div>
+
+                       <div class="space-y-6">
+                           <form [formGroup]="reportForm" (ngSubmit)="submitReport()" class="bg-white p-6 rounded-xl border border-gray-200 shadow-lg">
+                               <h3 class="font-bold text-gray-900 mb-6 text-center text-lg">Marcador Final</h3>
                                
-                               <div>
-                                   <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wide border-b border-gray-100 pb-2 mb-4">Marcador Final</h4>
-                                   <div class="flex items-center justify-center gap-8 bg-gray-50 p-6 rounded-lg">
-                                       <div class="text-center">
-                                           <label class="block text-xs font-bold text-gray-500 mb-2">{{ selectedMatch()!.home }}</label>
-                                           <input type="number" formControlName="homeScore" min="0" class="w-20 h-20 text-center text-4xl font-bold text-gray-900 border border-gray-300 rounded-lg focus:ring-4 focus:ring-[#4a9f24]/20 focus:border-[#4a9f24] focus:outline-none">
-                                       </div>
-                                       <span class="text-4xl font-light text-gray-300">-</span>
-                                       <div class="text-center">
-                                           <label class="block text-xs font-bold text-gray-500 mb-2">{{ selectedMatch()!.away }}</label>
-                                           <input type="number" formControlName="awayScore" min="0" class="w-20 h-20 text-center text-4xl font-bold text-gray-900 border border-gray-300 rounded-lg focus:ring-4 focus:ring-[#4a9f24]/20 focus:border-[#4a9f24] focus:outline-none">
-                                       </div>
+                               <div class="flex items-center justify-between gap-4 mb-8">
+                                   <div class="text-center">
+                                       <label class="block text-xs font-bold text-gray-500 mb-2 truncate max-w-[80px]">{{ selectedMatch()?.home }}</label>
+                                       <input type="number" formControlName="homeScore" class="w-20 h-20 text-center text-4xl font-black border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-[#4a9f24]/20 focus:border-[#4a9f24] bg-gray-50 disabled:bg-gray-100" [attr.disabled]="selectedMatch()?.status === 2 ? true : null">
+                                   </div>
+                                   <span class="text-2xl font-bold text-gray-300">-</span>
+                                   <div class="text-center">
+                                       <label class="block text-xs font-bold text-gray-500 mb-2 truncate max-w-[80px]">{{ selectedMatch()?.away }}</label>
+                                       <input type="number" formControlName="awayScore" class="w-20 h-20 text-center text-4xl font-black border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-[#4a9f24]/20 focus:border-[#4a9f24] bg-gray-50 disabled:bg-gray-100" [attr.disabled]="selectedMatch()?.status === 2 ? true : null">
                                    </div>
                                </div>
 
-                               <div>
-                                   <h4 class="text-sm font-bold text-gray-900 uppercase tracking-wide border-b border-gray-100 pb-2 mb-4">Informe Arbitral & Incidencias</h4>
-                                   <textarea formControlName="incidents" rows="6" class="w-full border border-gray-300 rounded-lg p-4 focus:ring-2 focus:ring-[#4a9f24]/20 focus:border-[#4a9f24] focus:outline-none text-sm leading-relaxed" placeholder="Ej: Min 15: Tarjeta Amarilla jugador #10 Local por falta temeraria..."></textarea>
+                               <div class="mb-6">
+                                   <label class="block text-xs font-bold text-gray-500 mb-2">Observaciones</label>
+                                   <textarea formControlName="incidents" rows="4" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-[#4a9f24]/20 disabled:bg-gray-100" [attr.disabled]="selectedMatch()?.status === 2 ? true : null"></textarea>
                                </div>
 
-                               <div class="flex items-center gap-3 p-4 bg-green-50 border border-green-100 rounded-lg">
-                                   <input type="checkbox" id="fairPlay" class="w-5 h-5 text-[#4a9f24] focus:ring-[#4a9f24] border-gray-300 rounded">
-                                   <label for="fairPlay" class="text-sm text-green-800 font-medium cursor-pointer">Confirmo que el partido se desarrolló bajo los estándares de Fair Play de la liga.</label>
-                               </div>
-
-                               <div class="flex justify-end gap-4 pt-4 border-t border-gray-100">
-                                   <button type="button" (click)="currentView.set('partidos')" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-bold hover:bg-gray-50 transition-colors text-sm">Cancelar</button>
-                                   <button type="submit" [disabled]="reportForm.invalid" class="px-6 py-3 bg-[#4a9f24] hover:bg-[#3d8b1e] text-white rounded-lg font-bold shadow-lg shadow-green-900/10 transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                                       Cerrar Acta Oficial
+                               @if (selectedMatch()?.status !== 2) {
+                                   <button type="submit" [disabled]="reportForm.invalid" class="w-full bg-[#4a9f24] hover:bg-[#3d8b1e] text-white py-3 rounded-lg font-bold shadow-md transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                                       CERRAR ACTA OFICIAL
                                    </button>
-                               </div>
-
+                               } @else {
+                                   <button type="button" (click)="currentView.set('partidos')" class="w-full border border-gray-300 text-gray-600 hover:bg-gray-50 py-3 rounded-lg font-bold transition-colors">
+                                       Volver a Lista
+                                   </button>
+                               }
                            </form>
                        </div>
-                   }
+
+                   </div>
                 </div>
 
              } @else {

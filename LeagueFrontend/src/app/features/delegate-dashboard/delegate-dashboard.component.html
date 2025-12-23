@@ -41,20 +41,26 @@
 
        <div class="p-8 max-w-7xl mx-auto w-full">
          
-         @if (currentView() === 'dashboard') {
-           <div class="bg-white p-6 rounded-lg border border-gray-100 shadow-sm mb-8">
-               <label class="block text-sm font-bold text-gray-700 mb-2">Estás gestionando el equipo:</label>
-               <select 
-                   [ngModel]="selectedTeamId()" 
-                   (change)="onTeamChange($event)"
-                   class="w-full md:w-1/2 border border-gray-300 rounded-lg px-4 py-2 focus:ring-[#34a01c] focus:border-[#34a01c]">
-                   @for (t of teams(); track t.id) {
-                       <option [value]="t.id">{{ t.name }}</option>
-                   }
-                   @if (teams().length === 0) { <option disabled>Cargando equipos...</option> }
-               </select>
-           </div>
+         <div class="bg-white p-6 rounded-lg border border-gray-100 shadow-sm mb-8 flex items-center justify-between">
+             <div>
+                 <label class="block text-sm font-bold text-gray-700 mb-1">Viendo datos de:</label>
+                 <select 
+                     [ngModel]="selectedTeamId()" 
+                     (change)="onTeamChange($event)"
+                     class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-[#34a01c] focus:border-[#34a01c] min-w-[250px]">
+                     @for (t of teams(); track t.id) {
+                         <option [value]="t.id">{{ t.name }}</option>
+                     }
+                     @if (teams().length === 0) { <option disabled>Cargando equipos...</option> }
+                 </select>
+             </div>
+             <div class="text-right hidden md:block">
+                 <p class="text-xs text-gray-500">Rol asignado</p>
+                 <p class="font-bold text-[#34a01c]">Delegado de Equipo</p>
+             </div>
+         </div>
 
+         @if (currentView() === 'dashboard') {
            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                <div class="bg-[#f0fdf4] p-6 rounded-lg flex flex-col items-center justify-center text-center border border-green-50 shadow-sm">
                  <div class="text-[#34a01c] mb-2"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg></div>
@@ -63,74 +69,49 @@
                </div>
                
                <div class="bg-white p-6 rounded-lg border border-gray-100 shadow-sm flex flex-col justify-center gap-3">
-                    <button (click)="currentView.set('registrar-jugador')" class="w-full py-2 px-4 bg-[#34a01c] hover:bg-[#2b8517] text-white rounded text-sm font-bold flex items-center justify-center gap-2 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
-                        Inscribir Jugador
+                    <p class="text-sm text-gray-500 mb-2">Accesos Directos</p>
+                    <button (click)="currentView.set('mis-jugadores')" class="w-full py-2 px-4 bg-[#34a01c] hover:bg-[#2b8517] text-white rounded text-sm font-bold flex items-center justify-center gap-2 transition-colors">
+                        Ver Mi Plantilla
                     </button>
-                    <button (click)="currentView.set('mis-jugadores')" class="w-full py-2 px-4 border border-gray-200 rounded text-sm font-medium text-gray-600 hover:bg-gray-50 flex items-center justify-center gap-2">
-                        Ver Lista Completa
+                    <button (click)="currentView.set('mi-equipo')" class="w-full py-2 px-4 border border-gray-200 rounded text-sm font-medium text-gray-600 hover:bg-gray-50 flex items-center justify-center gap-2">
+                        Ver Detalles del Club
                     </button>
                </div>
            </div>
 
-         } @else if (currentView() === 'registrar-jugador') {
-            <div class="w-full max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100 animate-fade-in">
-                <div class="flex items-center gap-4 mb-6">
-                    <button (click)="currentView.set('mis-jugadores')" class="text-gray-500 hover:text-[#34a01c]">
-                       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                    </button>
-                    <h2 class="text-2xl font-bold text-gray-900">Inscribir Nuevo Jugador</h2>
+           <h3 class="font-bold text-gray-800 mb-4">Avisos Importantes</h3>
+           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                @for (news of delegateNewsList(); track news.id) {
+                    <div class="bg-white p-4 rounded-lg border border-l-4 border-l-[#34a01c] shadow-sm">
+                        <h4 class="font-bold text-gray-900">{{ news.title }}</h4>
+                        <p class="text-sm text-gray-600 mt-1">{{ news.description }}</p>
+                    </div>
+                }
+           </div>
+
+         } @else if (currentView() === 'mi-equipo') {
+            <div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 animate-fade-in text-center">
+                <div class="w-24 h-24 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center text-4xl">🛡️</div>
+                <h2 class="text-2xl font-bold text-gray-900">{{ getTeamName() }}</h2>
+                <p class="text-gray-500">Categoría Oficial</p>
+                
+                <div class="mt-8 grid grid-cols-2 gap-4 max-w-md mx-auto text-left">
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <span class="block text-xs font-bold text-gray-400 uppercase">Director Técnico</span>
+                        <span class="block font-bold text-gray-800">Juan Pérez</span>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-lg">
+                        <span class="block text-xs font-bold text-gray-400 uppercase">Estado</span>
+                        <span class="block font-bold text-green-600">Habilitado</span>
+                    </div>
                 </div>
-
-                <form [formGroup]="playerForm" (ngSubmit)="onSubmitPlayer()" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                           <label class="block text-sm font-medium text-gray-700">Nombres</label>
-                           <input type="text" formControlName="name" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-[#34a01c] focus:border-[#34a01c]" placeholder="Juan">
-                        </div>
-                        <div>
-                           <label class="block text-sm font-medium text-gray-700">Apellidos</label>
-                           <input type="text" formControlName="lastName" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-[#34a01c] focus:border-[#34a01c]" placeholder="Pérez">
-                        </div>
-                        <div>
-                           <label class="block text-sm font-medium text-gray-700">C.I. (Solo números)</label>
-                           <input type="text" formControlName="ci" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-[#34a01c] focus:border-[#34a01c]">
-                        </div>
-                        <div>
-                           <label class="block text-sm font-medium text-gray-700">Dorsal (Camiseta)</label>
-                           <input type="number" formControlName="dorsal" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-[#34a01c] focus:border-[#34a01c]">
-                        </div>
-                        <div>
-                           <label class="block text-sm font-medium text-gray-700">Fecha de Nacimiento</label>
-                           <input type="date" formControlName="birthDate" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-[#34a01c] focus:border-[#34a01c]">
-                        </div>
-                        <div>
-                           <label class="block text-sm font-medium text-gray-700">Posición</label>
-                           <select formControlName="position" class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white">
-                               <option value="Portero">Portero</option>
-                               <option value="Defensa">Defensa</option>
-                               <option value="Mediocampista">Mediocampista</option>
-                               <option value="Delantero">Delantero</option>
-                           </select>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-end gap-4 pt-4 border-t border-gray-100">
-                        <button type="button" (click)="currentView.set('mis-jugadores')" class="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium">Cancelar</button>
-                        <button type="submit" [disabled]="playerForm.invalid || isSubmitting()" class="px-6 py-2.5 bg-[#34a01c] hover:bg-[#2b8517] text-white rounded-lg font-bold disabled:opacity-50">
-                            {{ isSubmitting() ? 'Guardando...' : 'Guardar Jugador' }}
-                        </button>
-                    </div>
-                </form>
             </div>
 
          } @else if (currentView() === 'mis-jugadores') {
            <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden animate-fade-in">
                <div class="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
                    <h3 class="text-xl font-bold text-gray-900">Plantilla Oficial</h3>
-                   <button (click)="currentView.set('registrar-jugador')" class="flex items-center gap-2 bg-[#34a01c] hover:bg-[#2b8517] text-white px-5 py-2.5 rounded-lg shadow-sm font-medium transition-colors">
-                       + Nuevo
-                   </button>
+                   <span class="text-xs font-bold bg-green-100 text-green-800 px-3 py-1 rounded-full">Verificado</span>
                </div>
                
                @if (isLoading()) {
@@ -140,27 +121,23 @@
                        <table class="w-full text-left">
                            <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
                                <tr>
-                                   <th class="px-8 py-4">Nombre</th>
-                                   <th class="px-8 py-4">Posición</th>
                                    <th class="px-8 py-4">Dorsal</th>
+                                   <th class="px-8 py-4">Nombre Completo</th>
+                                   <th class="px-8 py-4">Posición</th>
                                    <th class="px-8 py-4">C.I.</th>
-                                   <th class="px-8 py-4 text-right">Acción</th>
                                </tr>
                            </thead>
                            <tbody class="divide-y divide-gray-100">
                                @for (player of players(); track player.id) {
                                    <tr class="hover:bg-gray-50">
-                                       <td class="px-8 py-4 font-bold text-gray-900">{{ player.name }}</td>
-                                       <td class="px-8 py-4 text-gray-600">{{ player.position }}</td>
-                                       <td class="px-8 py-4 font-bold text-[#34a01c] text-lg">#{{ player.dorsal }}</td>
+                                       <td class="px-8 py-4 font-black text-[#34a01c] text-lg">#{{ player.number }}</td>
+                                       <td class="px-8 py-4 font-bold text-gray-900">{{ player.fullName }}</td>
+                                       <td class="px-8 py-4 text-gray-600">{{ player.positionLabel }}</td>
                                        <td class="px-8 py-4 text-gray-500">{{ player.ci }}</td>
-                                       <td class="px-8 py-4 text-right">
-                                           <button (click)="deletePlayer(player.id)" class="text-red-500 hover:text-red-700 text-sm font-medium">Eliminar</button>
-                                       </td>
                                    </tr>
                                }
                                @if (players().length === 0) {
-                                   <tr><td colspan="5" class="p-8 text-center text-gray-500">No hay jugadores registrados en este equipo.</td></tr>
+                                   <tr><td colspan="4" class="p-8 text-center text-gray-500">No hay jugadores registrados en este equipo.</td></tr>
                                }
                            </tbody>
                        </table>

@@ -37,7 +37,7 @@ import { StandingService } from '../services/standing.service';
              <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden animate-fade-in">
                 <div class="overflow-x-auto">
                   <table class="w-full text-left border-collapse">
-                     <thead class="bg-[#388e14] text-white text-xs font-bold uppercase tracking-wider">
+                      <thead class="bg-[#388e14] text-white text-xs font-bold uppercase tracking-wider">
                         <tr>
                            <th class="px-6 py-4 text-center w-16">#</th>
                            <th class="px-6 py-4">Equipo</th>
@@ -50,8 +50,8 @@ import { StandingService } from '../services/standing.service';
                            <th class="px-4 py-4 text-center" title="Diferencia de Goles">DG</th>
                            <th class="px-6 py-4 text-center font-black text-lg bg-black/10">PTS</th>
                         </tr>
-                     </thead>
-                     <tbody class="divide-y divide-gray-100">
+                      </thead>
+                      <tbody class="divide-y divide-gray-100">
                         @for (team of standings(); track team.teamId; let i = $index) {
                            <tr class="hover:bg-green-50/50 transition-colors text-sm group">
                               <td class="px-6 py-4 text-center font-bold text-gray-500">
@@ -90,7 +90,7 @@ import { StandingService } from '../services/standing.service';
                                 </td>
                             </tr> 
                         }
-                     </tbody>
+                      </tbody>
                   </table>
                 </div>
              </div>
